@@ -23,8 +23,46 @@ namespace Heroes.ReplayParser
                 switch (trackerEvent.TrackerEventType)
                 {
                     case ReplayTrackerEvents.TrackerEventType.UpgradeEvent:
-                        // Contains interesting data such as tracking some 'Gathering Power' type talents: {UpgradeEvent: {6, "NovaSnipeMasterDamageUpgrade", 1}}
-                        // We should save these kind of statistics somewhere
+                        switch (trackerEvent.Data.dictionary[1].blobText)
+                        {
+                            case "CreepColor":
+                                // Not sure what this is - it's been in the replay file since Alpha, so it may just be a SC2 remnant
+                                break;
+
+                            case "IsPlayer11":
+                            case "IsPlayer12":
+                                // Also not sure what this is
+                                break;
+
+                            case "GatesAreOpen":
+                            case "MinionsAreSpawning":
+                            case "GallTalentNetherCallsUpgrade":
+                            case "TracerJumperButtonSwap":
+                                // Not really interested in these
+                                break;
+
+                            case "VehicleDragonUpgrade":
+                                break;
+
+                            case "NovaSnipeMasterDamageUpgrade":
+                                playerIDDictionary[(int) trackerEvent.Data.dictionary[0].vInt.Value].UpgradeEvents.Add(new UpgradeEvent {
+                                    TimeSpan = trackerEvent.TimeSpan,
+                                    UpgradeEventType = UpgradeEventType.NovaSnipeMasterDamageUpgrade,
+                                    Value = (int) trackerEvent.Data.dictionary[2].vInt.Value });
+                                break;
+
+                            case "GallTalentDarkDescentUpgrade":
+                                playerIDDictionary[(int) trackerEvent.Data.dictionary[0].vInt.Value].UpgradeEvents.Add(new UpgradeEvent {
+                                    TimeSpan = trackerEvent.TimeSpan,
+                                    UpgradeEventType = UpgradeEventType.GallTalentDarkDescentUpgrade,
+                                    Value = (int) trackerEvent.Data.dictionary[2].vInt.Value });
+                                break;
+
+                            default:
+                                // New Upgrade Event - let's log it until we can identify and properly track it
+                                playerIDDictionary[(int) trackerEvent.Data.dictionary[0].vInt.Value].MiscellaneousUpgradeEventDictionary[trackerEvent.Data.dictionary[1].blobText] = true;
+                                break;
+                        }
                         break;
 
                     case ReplayTrackerEvents.TrackerEventType.StatGameEvent:
@@ -96,20 +134,48 @@ namespace Heroes.ReplayParser
                                             TrickleXP = (int)trackerEvent.Data.dictionary[3].optionalData.array[6].dictionary[1].vInt.Value });
                                 break;
 
+                            case "EndOfGameXPBreakdown": // {StatGameEvent: {"EndOfGameXPBreakdown", , [{{"PlayerID"}, 4}], [{{"MinionXP"}, 31222}, {{"CreepXP"}, 1476}, {{"StructureXP"}, 10550}, {{"HeroXP"}, 22676}, {{"TrickleXP"}, 27280}]}}
+                                if (trackerEvent.Data.dictionary[2].optionalData.array[0].dictionary[0].dictionary[0].blobText == "PlayerID" &&
+                                    trackerEvent.Data.dictionary[3].optionalData.array[0].dictionary[0].dictionary[0].blobText == "MinionXP" &&
+                                    trackerEvent.Data.dictionary[3].optionalData.array[1].dictionary[0].dictionary[0].blobText == "CreepXP" &&
+                                    trackerEvent.Data.dictionary[3].optionalData.array[2].dictionary[0].dictionary[0].blobText == "StructureXP" &&
+                                    trackerEvent.Data.dictionary[3].optionalData.array[3].dictionary[0].dictionary[0].blobText == "HeroXP" &&
+                                    trackerEvent.Data.dictionary[3].optionalData.array[4].dictionary[0].dictionary[0].blobText == "TrickleXP" &&
+                                    (!replay.TeamPeriodicXPBreakdown[playerIDDictionary[(int) trackerEvent.Data.dictionary[2].optionalData.array[0].dictionary[1].vInt.Value].Team].Any() || replay.TeamPeriodicXPBreakdown[playerIDDictionary[(int) trackerEvent.Data.dictionary[2].optionalData.array[0].dictionary[1].vInt.Value].Team].Last().TimeSpan != trackerEvent.TimeSpan))
+                                        replay.TeamPeriodicXPBreakdown[playerIDDictionary[(int) trackerEvent.Data.dictionary[2].optionalData.array[0].dictionary[1].vInt.Value].Team].Add(new PeriodicXPBreakdown {
+                                            TeamLevel = replay.TeamLevels[playerIDDictionary[(int) trackerEvent.Data.dictionary[2].optionalData.array[0].dictionary[1].vInt.Value].Team].Keys.Max(),
+                                            TimeSpan = trackerEvent.TimeSpan,
+                                            MinionXP = (int) trackerEvent.Data.dictionary[3].optionalData.array[0].dictionary[1].vInt.Value,
+                                            CreepXP = (int) trackerEvent.Data.dictionary[3].optionalData.array[1].dictionary[1].vInt.Value,
+                                            StructureXP = (int) trackerEvent.Data.dictionary[3].optionalData.array[2].dictionary[1].vInt.Value,
+                                            HeroXP = (int) trackerEvent.Data.dictionary[3].optionalData.array[3].dictionary[1].vInt.Value,
+                                            TrickleXP = (int) trackerEvent.Data.dictionary[3].optionalData.array[4].dictionary[1].vInt.Value });
+                                break;
+
                             case "TownStructureInit": break;        // {StatGameEvent: {"TownStructureInit", , [{{"TownID"}, 5}, {{"Team"}, 1}, {{"Lane"}, 3}], [{{"PositionX"}, 59}, {{"PositionY"}, 93}]}}
                             case "JungleCampInit": break;           // {StatGameEvent: {"JungleCampInit", , [{{"CampID"}, 1}], [{{"PositionX"}, 101}, {{"PositionY"}, 74}]}}
                             case "PlayerSpawned": break;            // {StatGameEvent: {"PlayerSpawned", [{{"Hero"}, "HeroLeoric"}], [{{"PlayerID"}, 1}], }}
                             case "GatesOpen": break;                // {StatGameEvent: {"GatesOpen", , , }}
                             case "PlayerDeath": break;              // {StatGameEvent: {"PlayerDeath", , [{{"PlayerID"}, 8}, {{"KillingPlayer"}, 1}, {{"KillingPlayer"}, 2}, {{"KillingPlayer"}, 3}, {{"KillingPlayer"}, 4}, {{"KillingPlayer"}, 5}], [{{"PositionX"}, 130}, {{"PositionY"}, 80}]}}
                             case "RegenGlobePickedUp": break;       // {StatGameEvent: {"RegenGlobePickedUp", , [{{"PlayerID"}, 1}], }}
-                            case "JungleCampCapture": break;        // {StatGameEvent: {"JungleCampCapture", [{{"CampType"}, "Siege Camp"}], [{{"CampID"}, 1}], [{{"TeamID"}, 1}]}}
+
+                            case "JungleCampCapture":               // {StatGameEvent: {"JungleCampCapture", [{{"CampType"}, "Boss Camp"}], [{{"CampID"}, 1}], [{{"TeamID"}, 1}]}}
+                                if (trackerEvent.Data.dictionary[1].optionalData.array[0].dictionary[1].blobText == "Boss Camp")
+                                {
+                                    var teamID = trackerEvent.Data.dictionary[3].optionalData.array[0].dictionary[1].vInt.Value;
+
+                                    // TODO: LOG THIS SOMEWHERE
+                                }
+                                break;
+
                             case "TownStructureDeath": break;       // {StatGameEvent: {"TownStructureDeath", , [{{"TownID"}, 8}, {{"KillingPlayer"}, 1}, {{"KillingPlayer"}, 2}, {{"KillingPlayer"}, 3}, {{"KillingPlayer"}, 4}, {{"KillingPlayer"}, 5}], }}
-                            case "EndOfGameXPBreakdown": break;     // {StatGameEvent: {"EndOfGameXPBreakdown", , [{{"PlayerID"}, 4}], [{{"MinionXP"}, 31222}, {{"CreepXP"}, 1476}, {{"StructureXP"}, 10550}, {{"HeroXP"}, 22676}, {{"TrickleXP"}, 27280}]}}
                             case "EndOfGameTimeSpentDead": break;   // {StatGameEvent: {"EndOfGameTimeSpentDead", , [{{"PlayerID"}, 2}], [{{"Time"}, 162}]}}
 
                             // Map Objectives
                             case "Altar Captured": break;           // {StatGameEvent: {"Altar Captured", , [{{"Firing Team"}, 2}, {{"Towns Owned"}, 3}], }}
                             case "Town Captured": break;            // {StatGameEvent: {"Town Captured", , [{{"New Owner"}, 12}], }}
+                            case "Six Town Event Start": break;     // {StatGameEvent: {"Six Town Event Start", , [{{"Owning Team"}, 1}], [{{"Start Time"}, 742}]}}
+                            case "Six Town Event End": break;       // {StatGameEvent: {"Six Town Event End", , [{{"Owning Team"}, 1}], [{{"End Time"}, 747}]}}
 
                             case "SkyTempleActivated": break;       // {StatGameEvent: {"SkyTempleActivated", , [{{"Event"}, 1}, {{"TempleID"}, 1}], }}
                             case "SkyTempleCaptured": break;        // {StatGameEvent: {"SkyTempleCaptured", , [{{"Event"}, 1}, {{"TempleID"}, 2}, {{"TeamID"}, 2}], }}
@@ -129,6 +195,8 @@ namespace Heroes.ReplayParser
 
                             case "Infernal Shrine Captured": break; // {StatGameEvent: {"Infernal Shrine Captured", , [{{"Event"}, 1}, {{"Winning Team"}, 2}, {{"Winning Score"}, 40}, {{"Losing Score"}, 33}], }}
                             case "Punisher Killed": break;          // {StatGameEvent: {"Punisher Killed", [{{"Punisher Type"}, "BombardShrine"}], [{{"Event"}, 1}, {{"Owning Team of Punisher"}, 2}, {{"Duration"}, 20}], [{{"Siege Damage Done"}, 726}, {{"Hero Damage Done"}, 0}]}}
+
+                            case "DragonKnightActivated": break;    // {StatGameEvent: {"DragonKnightActivated", , [{{"Event"}, 1}], [{{"TeamID"}, 2}]}}
 
                             default:
                                 break;
