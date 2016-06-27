@@ -175,101 +175,101 @@
                 reader.Read(5); // m_maxUsers
                 reader.Read(5); // m_maxObservers
 
-                //// m_slots
-                //var slotsLength = reader.Read(5);
-                //for (var i = 0; i < slotsLength; i++)
-                //{
-                //    int? userID = null;
+                // m_slots
+                var slotsLength = reader.Read(5);
+                for (var i = 0; i < slotsLength; i++)
+                {
+                    int? userID = null;
 
-                //    reader.Read(8); // m_control
-                //    if (reader.ReadBoolean())
-                //        userID = (int) reader.Read(4); // m_userId
-                //    reader.Read(4); // m_teamId
-                //    if (reader.ReadBoolean())
-                //        reader.Read(5); // m_colorPref
-                //    if (reader.ReadBoolean())
-                //        reader.Read(8); // m_racePref
-                //    reader.Read(6); // m_difficulty
-                //    reader.Read(7); // m_aiBuild
-                //    reader.Read(7); // m_handicap
+                    reader.Read(8); // m_control
+                    if (reader.ReadBoolean())
+                        userID = (int) reader.Read(4); // m_userId
+                    reader.Read(4); // m_teamId
+                    if (reader.ReadBoolean())
+                        reader.Read(5); // m_colorPref
+                    if (reader.ReadBoolean())
+                        reader.Read(8); // m_racePref
+                    reader.Read(6); // m_difficulty
+                    reader.Read(7); // m_aiBuild
+                    reader.Read(7); // m_handicap
 
-                //    // m_observe
-                //    var observerStatus = reader.Read(2);
+                    // m_observe
+                    var observerStatus = reader.Read(2);
 
-                //    reader.Read(32); // m_logoIndex
+                    reader.Read(32); // m_logoIndex
 
-                //    reader.ReadBlobPrecededWithLength(9); // m_hero
+                    reader.ReadBlobPrecededWithLength(9); // m_hero
 
-                //    var skinAndSkinTint = Encoding.ASCII.GetString(reader.ReadBlobPrecededWithLength(9)); // m_skin
-                //    if (skinAndSkinTint == "")
-                //        skinAndSkinTint = null;
+                    var skinAndSkinTint = Encoding.ASCII.GetString(reader.ReadBlobPrecededWithLength(9)); // m_skin
+                    if (skinAndSkinTint == "")
+                        skinAndSkinTint = null;
 
-                //    var mountAndMountTint = Encoding.ASCII.GetString(reader.ReadBlobPrecededWithLength(9)); // m_mount
-                //    if (mountAndMountTint == "")
-                //        mountAndMountTint = null;
+                    var mountAndMountTint = Encoding.ASCII.GetString(reader.ReadBlobPrecededWithLength(9)); // m_mount
+                    if (mountAndMountTint == "")
+                        mountAndMountTint = null;
 
-                //    // m_artifacts
-                //    var artifactsLength = reader.Read(4);
-                //    for (var j = 0; j < artifactsLength; j++)
-                //        reader.ReadBlobPrecededWithLength(9);
+                    // m_artifacts
+                    var artifactsLength = reader.Read(4);
+                    for (var j = 0; j < artifactsLength; j++)
+                        reader.ReadBlobPrecededWithLength(9);
 
-                //    int? workingSetSlotID = null;
-                //    if (reader.ReadBoolean())
-                //        workingSetSlotID = (int) reader.Read(8); // m_workingSetSlotId
+                    int? workingSetSlotID = null;
+                    if (reader.ReadBoolean())
+                        workingSetSlotID = (int) reader.Read(8); // m_workingSetSlotId
 
-                //    if (userID.HasValue && workingSetSlotID.HasValue) 
-                //    {
-                //        if (replay.ClientListByWorkingSetSlotID[workingSetSlotID.Value] != null)
-                //            replay.ClientListByUserID[userID.Value] = replay.ClientListByWorkingSetSlotID[workingSetSlotID.Value];
+                    if (userID.HasValue && workingSetSlotID.HasValue)
+                    {
+                        if (replay.ClientListByWorkingSetSlotID[workingSetSlotID.Value] != null)
+                            replay.ClientListByUserID[userID.Value] = replay.ClientListByWorkingSetSlotID[workingSetSlotID.Value];
 
-                //        if (observerStatus == 2)
-                //            replay.ClientListByUserID[userID.Value].PlayerType = PlayerType.Spectator;
+                        if (observerStatus == 2)
+                            replay.ClientListByUserID[userID.Value].PlayerType = PlayerType.Spectator;
 
-                //        replay.ClientListByUserID[userID.Value].SkinAndSkinTint = skinAndSkinTint;
-                //        replay.ClientListByUserID[userID.Value].MountAndMountTint = mountAndMountTint;
-                //    }
+                        replay.ClientListByUserID[userID.Value].SkinAndSkinTint = skinAndSkinTint;
+                        replay.ClientListByUserID[userID.Value].MountAndMountTint = mountAndMountTint;
+                    }
 
-                //    // m_rewards
-                //    var rewardsLength = reader.Read(17);
-                //    for (var j = 0; j < rewardsLength; j++)
-                //        reader.Read(32);
+                    // m_rewards
+                    var rewardsLength = reader.Read(17);
+                    for (var j = 0; j < rewardsLength; j++)
+                        reader.Read(32);
 
-                //    reader.ReadBlobPrecededWithLength(7); // m_toonHandle
+                    reader.ReadBlobPrecededWithLength(7); // m_toonHandle
 
-                //    // m_licenses
-                //    var licensesLength = reader.Read(9);
-                //    for (var j = 0; j < licensesLength; j++)
-                //        reader.Read(32);
+                    // m_licenses
+                    var licensesLength = reader.Read(9);
+                    for (var j = 0; j < licensesLength; j++)
+                        reader.Read(32);
 
-                //    if (reader.ReadBoolean())
-                //        reader.Read(4); // m_tandemLeaderUserId
+                    if (reader.ReadBoolean())
+                        reader.Read(4); // m_tandemLeaderUserId
 
-                //    if (replay.ReplayBuild <= 41504)
-                //    {
-                //        reader.ReadBlobPrecededWithLength(9); // m_commander - Empty string
+                    if (replay.ReplayBuild <= 41504)
+                    {
+                        reader.ReadBlobPrecededWithLength(9); // m_commander - Empty string
 
-                //        reader.Read(32); // m_commanderLevel - So far, always 0
-                //    }
+                        reader.Read(32); // m_commanderLevel - So far, always 0
+                    }
 
-                //    if (reader.ReadBoolean() && userID.HasValue) // m_hasSilencePenalty
-                //        replay.ClientListByUserID[userID.Value].IsSilenced = true;
-                //}
+                    if (reader.ReadBoolean() && userID.HasValue) // m_hasSilencePenalty
+                        replay.ClientListByUserID[userID.Value].IsSilenced = true;
+                }
 
-                //if (reader.Read(32) != replay.RandomValue) // m_randomSeed
-                //    throw new Exception("Replay Random Seed Values in Replay Init Data did not match");
+                if (reader.Read(32) != replay.RandomValue) // m_randomSeed
+                    throw new Exception("Replay Random Seed Values in Replay Init Data did not match");
 
-                //if (reader.ReadBoolean())
-                //    reader.Read(4); // m_hostUserId
+                if (reader.ReadBoolean())
+                    reader.Read(4); // m_hostUserId
 
-                //reader.ReadBoolean(); // m_isSinglePlayer
+                reader.ReadBoolean(); // m_isSinglePlayer
 
-                //reader.Read(8); // m_pickedMapTag - So far, always 0
+                reader.Read(8); // m_pickedMapTag - So far, always 0
 
-                //reader.Read(32); // m_gameDuration - So far, always 0
+                reader.Read(32); // m_gameDuration - So far, always 0
 
-                //reader.Read(6); // m_defaultDifficulty
+                reader.Read(6); // m_defaultDifficulty
 
-                //reader.Read(7); // m_defaultAIBuild
+                reader.Read(7); // m_defaultAIBuild
 
                 #endregion
             }
