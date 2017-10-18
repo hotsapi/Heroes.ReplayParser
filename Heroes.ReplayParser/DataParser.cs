@@ -41,52 +41,38 @@ namespace Heroes.ReplayParser
 
         public static Tuple<ReplayParseResult, Replay> ParseReplay(byte[] bytes, bool ignoreErrors = false, bool allowPTRRegion = false, bool skipEventParsing = false, bool skipUnitParsing = false, bool skipMouseMoveEvents = false)
         {
-            try
-            {
-                var replay = new Replay();
+            var replay = new Replay();
 
-                // File in the version numbers for later use.
-                MpqHeader.ParseHeader(replay, bytes);
+            // File in the version numbers for later use.
+            MpqHeader.ParseHeader(replay, bytes);
 
-                if (!ignoreErrors && replay.ReplayBuild < 32455)
-                    return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.PreAlphaWipe, null);
+            if (!ignoreErrors && replay.ReplayBuild < 32455)
+                return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.PreAlphaWipe, null);
 
-                using (var memoryStream = new MemoryStream(bytes))
-                using (var archive = new MpqArchive(memoryStream))
-                    ParseReplayArchive(replay, archive, ignoreErrors, skipEventParsing, skipUnitParsing, skipMouseMoveEvents);
+            using (var memoryStream = new MemoryStream(bytes))
+            using (var archive = new MpqArchive(memoryStream))
+                ParseReplayArchive(replay, archive, ignoreErrors, skipEventParsing, skipUnitParsing, skipMouseMoveEvents);
 
-                return ParseReplayResults(replay, ignoreErrors, allowPTRRegion);
-            }
-            catch
-            {
-                return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.Exception, null);
-            }
+            return ParseReplayResults(replay, ignoreErrors, allowPTRRegion);
         }
 
         public static Tuple<ReplayParseResult, Replay> ParseReplay(string fileName, bool ignoreErrors, bool deleteFile, bool allowPTRRegion = false, bool skipEventParsing = false, bool skipUnitParsing = false, bool skipMouseMoveEvents = false)
         {
-            try
-            {
-                var replay = new Replay();
+            var replay = new Replay();
 
-                // File in the version numbers for later use.
-                MpqHeader.ParseHeader(replay, fileName);
+            // File in the version numbers for later use.
+            MpqHeader.ParseHeader(replay, fileName);
 
-                if (!ignoreErrors && replay.ReplayBuild < 32455)
-                    return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.PreAlphaWipe, null);
+            if (!ignoreErrors && replay.ReplayBuild < 32455)
+                return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.PreAlphaWipe, null);
 
-                using (var archive = new MpqArchive(fileName))
-                    ParseReplayArchive(replay, archive, ignoreErrors, skipEventParsing, skipUnitParsing, skipMouseMoveEvents);
+            using (var archive = new MpqArchive(fileName))
+                ParseReplayArchive(replay, archive, ignoreErrors, skipEventParsing, skipUnitParsing, skipMouseMoveEvents);
 
-                if (deleteFile)
-                    File.Delete(fileName);
+            if (deleteFile)
+                File.Delete(fileName);
 
-                return ParseReplayResults(replay, ignoreErrors, allowPTRRegion);
-            }
-            catch
-            {
-                return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.Exception, null);
-            }
+            return ParseReplayResults(replay, ignoreErrors, allowPTRRegion);
         }
 
         private static Tuple<ReplayParseResult, Replay> ParseReplayResults(Replay replay, bool ignoreErrors, bool allowPTRRegion)
