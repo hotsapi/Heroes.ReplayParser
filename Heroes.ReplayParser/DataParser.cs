@@ -39,7 +39,7 @@ namespace Heroes.ReplayParser
             { "Battlefield of Eternity", new Tuple<double, double, double, double>(-5.0, 33.0, 1.09, 0.96) }
         };
 
-        public static Tuple<ReplayParseResult, Replay> ParseReplay(byte[] bytes, bool ignoreErrors = false, bool allowPTRRegion = false, bool skipEventParsing = false)
+        public static Tuple<ReplayParseResult, Replay> ParseReplay(byte[] bytes, bool ignoreErrors = false, bool allowPTRRegion = false, bool skipEventParsing = false, bool skipUnitParsing = false, bool skipMouseMoveEvents = false)
         {
             try
             {
@@ -53,7 +53,7 @@ namespace Heroes.ReplayParser
 
                 using (var memoryStream = new MemoryStream(bytes))
                 using (var archive = new MpqArchive(memoryStream))
-                    ParseReplayArchive(replay, archive, ignoreErrors, skipEventParsing);
+                    ParseReplayArchive(replay, archive, ignoreErrors, skipEventParsing, skipUnitParsing, skipMouseMoveEvents);
 
                 return ParseReplayResults(replay, ignoreErrors, allowPTRRegion);
             }
@@ -63,7 +63,7 @@ namespace Heroes.ReplayParser
             }
         }
 
-        public static Tuple<ReplayParseResult, Replay> ParseReplay(string fileName, bool ignoreErrors, bool deleteFile, bool allowPTRRegion = false, bool skipEventParsing = false)
+        public static Tuple<ReplayParseResult, Replay> ParseReplay(string fileName, bool ignoreErrors, bool deleteFile, bool allowPTRRegion = false, bool skipEventParsing = false, bool skipUnitParsing = false, bool skipMouseMoveEvents = false)
         {
             try
             {
@@ -76,7 +76,7 @@ namespace Heroes.ReplayParser
                     return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.PreAlphaWipe, null);
 
                 using (var archive = new MpqArchive(fileName))
-                    ParseReplayArchive(replay, archive, ignoreErrors, skipEventParsing);
+                    ParseReplayArchive(replay, archive, ignoreErrors, skipEventParsing, skipUnitParsing, skipMouseMoveEvents);
 
                 if (deleteFile)
                     File.Delete(fileName);
@@ -115,7 +115,7 @@ namespace Heroes.ReplayParser
                 return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.Success, replay);
         }
 
-        private static void ParseReplayArchive(Replay replay, MpqArchive archive, bool ignoreErrors, bool skipEventParsing)
+        private static void ParseReplayArchive(Replay replay, MpqArchive archive, bool ignoreErrors, bool skipEventParsing, bool skipUnitParsing, bool skipMouseMoveEvents)
         {
             archive.AddListfileFilenames();
 
@@ -146,7 +146,7 @@ namespace Heroes.ReplayParser
 
                 try
                 {
-                    replay.GameEvents = ReplayGameEvents.Parse(GetMpqFile(archive, ReplayGameEvents.FileName), replay.ClientListByUserID, replay.ReplayBuild, replay.ReplayVersionMajor);
+                    replay.GameEvents = ReplayGameEvents.Parse(GetMpqFile(archive, ReplayGameEvents.FileName), replay.ClientListByUserID, replay.ReplayBuild, replay.ReplayVersionMajor, skipMouseMoveEvents);
                     replay.IsGameEventsParsedSuccessfully = true;
                 }
                 catch
@@ -170,10 +170,12 @@ namespace Heroes.ReplayParser
 			    // Replay Server Battlelobby
 			    if(!ignoreErrors && archive.Any(i => i.Filename == ReplayServerBattlelobby.FileName))
 				    ReplayServerBattlelobby.GetBattleTags(replay, GetMpqFile(archive, ReplayServerBattlelobby.FileName));
-				    // ReplayServerBattlelobby.Parse(replay, GetMpqFile(archive, ReplayServerBattlelobby.FileName));
+                    // ReplayServerBattlelobby.Parse(replay, GetMpqFile(archive, ReplayServerBattlelobby.FileName));
 
                 // Parse Unit Data using Tracker events
-                Unit.ParseUnitData(replay);
+                if (!skipUnitParsing) {
+                    Unit.ParseUnitData(replay);
+                }
 
                 // Parse Statistics
                 if (replay.ReplayBuild >= 40431)

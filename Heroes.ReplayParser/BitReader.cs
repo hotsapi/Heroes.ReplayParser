@@ -80,6 +80,27 @@
         }
 
         /// <summary>
+        /// Skip specified number of bits in stream.
+        /// </summary>
+        /// <param name="numBits">The number of bits to skip.</param>
+        public void Skip(int numBits)
+        {
+            // todo: calculade number of bytes to skip and just increment this.stream position
+            while (numBits > 0) {
+                var bytePos = this.Cursor & 7;
+                int bitsLeftInByte = 8 - bytePos;
+                if (bytePos == 0) {
+                    this.currentByte = this.stream.ReadByte();
+                }
+
+                var bitsToRead = (bitsLeftInByte > numBits) ? numBits : bitsLeftInByte;
+                
+                this.Cursor += bitsToRead;
+                numBits -= bitsToRead;
+            }
+        }
+
+        /// <summary>
         /// If in the middle of a byte, moves to the start of the next byte.
         /// </summary>
         public void AlignToByte()

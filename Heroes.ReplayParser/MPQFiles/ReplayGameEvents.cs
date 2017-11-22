@@ -11,7 +11,7 @@ namespace Heroes.ReplayParser
     {
         public const string FileName = "replay.game.events";
 
-        public static List<GameEvent> Parse(byte[] buffer, Player[] clientList, int replayBuild, int replayVersionMajor)
+        public static List<GameEvent> Parse(byte[] buffer, Player[] clientList, int replayBuild, int replayVersionMajor, bool skipMouseMoveEvents)
         {
             // Referenced from https://raw.githubusercontent.com/Blizzard/heroprotocol/master/protocol39445.py
 
@@ -394,26 +394,31 @@ namespace Heroes.ReplayParser
                             gameEvent.data = new TrackerEventStructure { unsignedInt = bitReader.Read(1) };
                             break;
                         case GameEventType.CTriggerMouseClickedEvent:
-                            bitReader.Read(32); // m_button
-                            bitReader.ReadBoolean(); // m_down
-                            bitReader.Read(11); // m_posUI X
-                            bitReader.Read(11); // m_posUI Y
-                            bitReader.Read(20); // m_posWorld X
-                            bitReader.Read(20); // m_posWorld Y
-                            bitReader.Read(32); // m_posWorld Z (Offset -2147483648)
-                            bitReader.Read(8); // m_flags (-128)
+                            bitReader.Skip(32 + 1 + 11 + 11 + 20 + 20 + 32 + 8);
+                            //bitReader.Read(32); // m_button
+                            //bitReader.ReadBoolean(); // m_down
+                            //bitReader.Read(11); // m_posUI X
+                            //bitReader.Read(11); // m_posUI Y
+                            //bitReader.Read(20); // m_posWorld X
+                            //bitReader.Read(20); // m_posWorld Y
+                            //bitReader.Read(32); // m_posWorld Z (Offset -2147483648)
+                            //bitReader.Read(8); // m_flags (-128)
                             break;
                         case GameEventType.CTriggerMouseMovedEvent:
-                            gameEvent.data = new TrackerEventStructure { array = new[] {
-								// m_posUI
+                            if (skipMouseMoveEvents) {
+                                bitReader.Skip(11 + 11 + 20 + 20 + 32 + 8);
+                            } else {
+                                gameEvent.data = new TrackerEventStructure { array = new[] {
+                                // m_posUI
                                 new TrackerEventStructure { unsignedInt = bitReader.Read(11) },
                                 new TrackerEventStructure { unsignedInt = bitReader.Read(11) },
 
-								// m_posWorld
+                                // m_posWorld
                                 new TrackerEventStructure { array = new[] { new TrackerEventStructure { unsignedInt = bitReader.Read(20) }, new TrackerEventStructure { unsignedInt = bitReader.Read(20) }, new TrackerEventStructure { vInt = bitReader.Read(32) - 2147483648 } } },
 
-								// m_flags
+                                // m_flags
                                 new TrackerEventStructure { vInt = bitReader.Read(8) - 128 } } };
+                            }
                             break;
                         case GameEventType.CTriggerHotkeyPressedEvent:
                             gameEvent.data = new TrackerEventStructure { unsignedInt = bitReader.Read(32) }; // May be missing an offset value
