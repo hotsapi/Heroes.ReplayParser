@@ -91,6 +91,11 @@ namespace Heroes.ReplayParser
         public bool IsSilenced { get; set; } = false;
 
         /// <summary>
+        /// Gets or sets if the player has been given the voice silence penalty
+        /// </summary>
+        public bool IsVoiceSilence { get; set; } = false;
+
+        /// <summary>
         /// Gets or sets the player's selected Hero talents
         /// </summary>
         public Talent[] Talents { get; set; } = new Talent[0];
@@ -164,8 +169,9 @@ namespace Heroes.ReplayParser
         public int SelfHealing { get; set; } = 0;
 
         public int? DamageTaken { get; set; } = null;
+		public int? DamageSoaked { get; set; } = null;
 
-        public int ExperienceContribution { get; set; } = 0;
+		public int ExperienceContribution { get; set; } = 0;
         public int TownKills { get; set; } = 0;
 
         public TimeSpan TimeSpentDead { get; set; } = TimeSpan.Zero;
@@ -261,6 +267,7 @@ namespace Heroes.ReplayParser
         MostDamageDoneToZerg = 1012,
         MostNukeDamageDone = 1013,
 		MostTimePushing = 1016,
-		MostTimeOnPoint = 1019
+		MostTimeOnPoint = 1019,
+		MostInterruptedCageUnlocks = 1022
 	}
 }

@@ -56,7 +56,7 @@ namespace Heroes.ReplayParser
             return ParseReplayResults(replay, ignoreErrors, allowPTRRegion);
         }
 
-        public static Tuple<ReplayParseResult, Replay> ParseReplay(string fileName, bool ignoreErrors, bool deleteFile, bool allowPTRRegion = false, bool skipEventParsing = false, bool skipUnitParsing = false, bool skipMouseMoveEvents = false)
+        public static Tuple<ReplayParseResult, Replay> ParseReplay(string fileName, bool ignoreErrors, bool deleteFile, bool allowPTRRegion = false, bool skipEventParsing = false, bool skipUnitParsing = false, bool skipMouseMoveEvents = false, bool detailedBattleLobbyParsing = false)
         {
             var replay = new Replay();
 
@@ -67,7 +67,7 @@ namespace Heroes.ReplayParser
                 return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.PreAlphaWipe, null);
 
             using (var archive = new MpqArchive(fileName))
-                ParseReplayArchive(replay, archive, ignoreErrors, skipEventParsing, skipUnitParsing, skipMouseMoveEvents);
+                ParseReplayArchive(replay, archive, ignoreErrors, skipEventParsing, skipUnitParsing, skipMouseMoveEvents, detailedBattleLobbyParsing);
 
             if (deleteFile)
                 File.Delete(fileName);
@@ -91,7 +91,7 @@ namespace Heroes.ReplayParser
                 return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.UnexpectedResult, null);
             else if (replay.Timestamp < new DateTime(2014, 10, 6, 0, 0, 0, DateTimeKind.Utc))
                 return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.PreAlphaWipe, null);
-            else if (replay.Players.Any(i => i.PlayerType == PlayerType.Computer || i.Character == "Random Hero" || i.Name.Contains(' ')))
+            else if (replay.Players.Count(i => i.PlayerType == PlayerType.Computer || i.Character == "Random Hero" || i.Name.Contains(' ')) > (replay.GameMode == GameMode.Brawl ? 5 : 0))
                 return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.ComputerPlayerFound, null);
             else if (!allowPTRRegion && replay.Players.Any(i => i.BattleNetRegionId >= 90 /* PTR/Test Region */))
                 return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.PTRRegion, null);
@@ -101,7 +101,7 @@ namespace Heroes.ReplayParser
                 return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.Success, replay);
         }
 
-        private static void ParseReplayArchive(Replay replay, MpqArchive archive, bool ignoreErrors, bool skipEventParsing, bool skipUnitParsing, bool skipMouseMoveEvents)
+        private static void ParseReplayArchive(Replay replay, MpqArchive archive, bool ignoreErrors, bool skipEventParsing, bool skipUnitParsing, bool skipMouseMoveEvents, bool detailedBattleLobbyParsing = false)
         {
             archive.AddListfileFilenames();
 
@@ -127,7 +127,7 @@ namespace Heroes.ReplayParser
             ReplayAttributeEvents.Parse(replay, GetMpqFile(archive, ReplayAttributeEvents.FileName));
 
             if (!skipEventParsing)
-            { 
+            {
                 replay.TrackerEvents = ReplayTrackerEvents.Parse(GetMpqFile(archive, ReplayTrackerEvents.FileName));
 
                 try
@@ -153,10 +153,14 @@ namespace Heroes.ReplayParser
                         player.Talents = talentGameEventsDictionary[player];
                 }
 
-			    // Replay Server Battlelobby
-			    if(!ignoreErrors && archive.Any(i => i.Filename == ReplayServerBattlelobby.FileName))
-				    ReplayServerBattlelobby.GetBattleTags(replay, GetMpqFile(archive, ReplayServerBattlelobby.FileName));
-                    // ReplayServerBattlelobby.Parse(replay, GetMpqFile(archive, ReplayServerBattlelobby.FileName));
+	            // Replay Server Battlelobby
+	            if (!ignoreErrors && archive.Any(i => i.Filename == ReplayServerBattlelobby.FileName))
+	            {
+	                if (detailedBattleLobbyParsing)
+	                    ReplayServerBattlelobby.Parse(replay, GetMpqFile(archive, ReplayServerBattlelobby.FileName));
+	                else
+	                    ReplayServerBattlelobby.GetBattleTags(replay, GetMpqFile(archive, ReplayServerBattlelobby.FileName));
+	            }
 
                 // Parse Unit Data using Tracker events
                 if (!skipUnitParsing) {
