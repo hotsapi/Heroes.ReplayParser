@@ -100,10 +100,15 @@ namespace Heroes.ReplayParser
 		/// </summary>
 		public bool IsBlizzardStaff { get; set; } = false;
 
-		/// <summary>
-		/// Gets or sets the player's selected Hero talents
-		/// </summary>
-		public Talent[] Talents { get; set; } = new Talent[0];
+        /// <summary>
+        /// Gets or sets if the player has an active boost
+        /// </summary>
+        public bool HasActiveBoost { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets the player's selected Hero talents
+        /// </summary>
+        public Talent[] Talents { get; set; } = new Talent[0];
 
         /// <summary>
         /// Gets or sets the player's in game Hero units.
@@ -159,7 +164,6 @@ namespace Heroes.ReplayParser
         public int SoloKills { get; set; } = 0;
         public int Assists { get; set; } = 0;
         public int Deaths { get; set; } = 0;
-        public int HighestKillStreak { get; set; } = 0;
 
         public int HeroDamage { get; set; } = 0;
         public int SiegeDamage { get; set; } = 0;
@@ -185,6 +189,24 @@ namespace Heroes.ReplayParser
         public int WatchTowerCaptures { get; set; } = 0;
 
         public int MetaExperience { get; set; } = 0; // Exp added to the player's Account and Hero level after the match
+
+        public int HighestKillStreak { get; set; } = 0;
+        public int ProtectionGivenToAllies { get; set; } = 0;
+        public int TimeSilencingEnemyHeroes { get; set; } = 0;
+        public int TimeRootingEnemyHeroes { get; set; } = 0;
+        public int TimeStunningEnemyHeroes { get; set; } = 0;
+        public int ClutchHealsPerformed { get; set; } = 0;
+        public int EscapesPerformed { get; set; } = 0;
+        public int VengeancesPerformed { get; set; } = 0;
+        public int OutnumberedDeaths { get; set; } = 0;
+        public int TeamfightEscapesPerformed { get; set; } = 0;
+        public int TeamfightHealingDone { get; set; } = 0;
+        public int TeamfightDamageTaken { get; set; } = 0;
+        public int TeamfightHeroDamage { get; set; } = 0;
+
+        public int Multikill { get; set; } = 0;
+        public int? PhysicalDamage { get; set; } = null;
+        public int? SpellDamage { get; set; } = null;
 
         public List<MatchAwardType> MatchAwards { get; set; } = new List<MatchAwardType>();
     }
@@ -273,6 +295,7 @@ namespace Heroes.ReplayParser
         MostNukeDamageDone = 1013,
 		MostTimePushing = 1016,
 		MostTimeOnPoint = 1019,
-		MostInterruptedCageUnlocks = 1022
-	}
+		MostInterruptedCageUnlocks = 1022,
+        MostSeedsCollected = 1023
+    }
 }

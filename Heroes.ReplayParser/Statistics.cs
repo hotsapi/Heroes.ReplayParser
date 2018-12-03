@@ -108,7 +108,10 @@ namespace Heroes.ReplayParser
 
             foreach (var trackerEvent in replay.TrackerEvents.Where(i =>
 				i.TrackerEventType == ReplayTrackerEvents.TrackerEventType.PlayerSetupEvent ||
-				i.TrackerEventType == ReplayTrackerEvents.TrackerEventType.UpgradeEvent ||
+                i.TrackerEventType == ReplayTrackerEvents.TrackerEventType.HeroBannedEvent ||
+                i.TrackerEventType == ReplayTrackerEvents.TrackerEventType.HeroPickedEvent ||
+                i.TrackerEventType == ReplayTrackerEvents.TrackerEventType.HeroSwappedEvent ||
+                i.TrackerEventType == ReplayTrackerEvents.TrackerEventType.UpgradeEvent ||
 				i.TrackerEventType == ReplayTrackerEvents.TrackerEventType.StatGameEvent ||
 				i.TrackerEventType == ReplayTrackerEvents.TrackerEventType.ScoreResultEvent))
                 switch (trackerEvent.TrackerEventType)
@@ -116,6 +119,30 @@ namespace Heroes.ReplayParser
 					case ReplayTrackerEvents.TrackerEventType.PlayerSetupEvent:
 						playerIDDictionary[(int)trackerEvent.Data.dictionary[0].vInt.Value] = replay.ClientListByWorkingSetSlotID[(int)trackerEvent.Data.dictionary[3].optionalData.vInt.Value];
 						break;
+                    case ReplayTrackerEvents.TrackerEventType.HeroBannedEvent:
+                        replay.DraftOrder.Add(new DraftPick()
+                        {
+                            HeroSelected = trackerEvent.Data.dictionary[0].blobText,
+                            SelectedPlayerSlotId = (int)trackerEvent.Data.dictionary[1].vInt.Value,
+                            PickType = DraftPickType.Banned,
+                        });
+                        break;
+                    case ReplayTrackerEvents.TrackerEventType.HeroPickedEvent:
+                        replay.DraftOrder.Add(new DraftPick()
+                        {
+                            HeroSelected = trackerEvent.Data.dictionary[0].blobText,
+                            SelectedPlayerSlotId = (int)trackerEvent.Data.dictionary[1].vInt.Value,
+                            PickType = DraftPickType.Picked
+                        });
+                        break;
+                    case ReplayTrackerEvents.TrackerEventType.HeroSwappedEvent:
+                        replay.DraftOrder.Add(new DraftPick()
+                        {
+                            HeroSelected = trackerEvent.Data.dictionary[0].blobText,
+                            SelectedPlayerSlotId = (int)trackerEvent.Data.dictionary[1].vInt.Value,
+                            PickType = DraftPickType.Swapped
+                        });
+                        break;
                     case ReplayTrackerEvents.TrackerEventType.UpgradeEvent:
                         switch (trackerEvent.Data.dictionary[1].blobText)
                         {
@@ -222,6 +249,8 @@ namespace Heroes.ReplayParser
                                 break;
 
                             case "EndOfGameTalentChoices": // {StatGameEvent: {"EndOfGameTalentChoices", [{{"Hero"}, "HeroAbathur"}, {{"Win/Loss"}, "Win"}, {{"Map"}, "HauntedWoods"}, {{"Tier 1 Choice"}, "AbathurMasteryRegenerativeMicrobes"}, {{"Tier 2 Choice"}, "AbathurSymbioteCarapaceSustainedCarapace"}, {{"Tier 3 Choice"}, "AbathurMasteryNeedlespine"}, {{"Tier 4 Choice"}, "AbathurHeroicAbilityUltimateEvolution"}, {{"Tier 5 Choice"}, "AbathurSymbioteSpikeBurstSomaTransference"}, {{"Tier 6 Choice"}, "AbathurVolatileMutation"}, {{"Tier 7 Choice"}, "AbathurMasteryLocustMaster"}], [{{"PlayerID"}, 1}, {{"Level"}, 24}], }}
+                                if (string.IsNullOrEmpty(replay.MapAlternativeName) && trackerEvent.Data.dictionary[1].optionalData.array.Length > 2)
+                                    replay.MapAlternativeName = trackerEvent.Data.dictionary[1].optionalData.array[2].dictionary[1].blobText; // map name
                                 break;
 
                             case "TalentChosen": // {StatGameEvent: {"TalentChosen", [{{"PurchaseName"}, "NovaCombatStyleAdvancedCloaking"}], [{{"PlayerID"}, 6}], }}
@@ -621,11 +650,86 @@ namespace Heroes.ReplayParser
                                         if (scoreResultEventValueArray[i].HasValue)
                                             replay.ClientListByWorkingSetSlotID[i].ScoreResult.MetaExperience = scoreResultEventValueArray[i].Value;
                                     break;
-
                                 case "HighestKillStreak":
                                     for (var i = 0; i < scoreResultEventValueArray.Length; i++)
                                         if (scoreResultEventValueArray[i].HasValue)
                                             replay.ClientListByWorkingSetSlotID[i].ScoreResult.HighestKillStreak = scoreResultEventValueArray[i].Value;
+                                    break;
+                                case "ProtectionGivenToAllies":
+                                    for (var i = 0; i < scoreResultEventValueArray.Length; i++)
+                                        if (scoreResultEventValueArray[i].HasValue)
+                                            replay.ClientListByWorkingSetSlotID[i].ScoreResult.ProtectionGivenToAllies = scoreResultEventValueArray[i].Value;
+                                    break;
+                                case "TimeSilencingEnemyHeroes":
+                                    for (var i = 0; i < scoreResultEventValueArray.Length; i++)
+                                        if (scoreResultEventValueArray[i].HasValue)
+                                            replay.ClientListByWorkingSetSlotID[i].ScoreResult.TimeSilencingEnemyHeroes = scoreResultEventValueArray[i].Value;
+                                    break;
+                                case "TimeRootingEnemyHeroes":
+                                    for (var i = 0; i < scoreResultEventValueArray.Length; i++)
+                                        if (scoreResultEventValueArray[i].HasValue)
+                                            replay.ClientListByWorkingSetSlotID[i].ScoreResult.TimeRootingEnemyHeroes = scoreResultEventValueArray[i].Value;
+                                    break;
+                                case "TimeStunningEnemyHeroes":
+                                    for (var i = 0; i < scoreResultEventValueArray.Length; i++)
+                                        if (scoreResultEventValueArray[i].HasValue)
+                                            replay.ClientListByWorkingSetSlotID[i].ScoreResult.TimeStunningEnemyHeroes = scoreResultEventValueArray[i].Value;
+                                    break;
+                                case "ClutchHealsPerformed":
+                                    for (var i = 0; i < scoreResultEventValueArray.Length; i++)
+                                        if (scoreResultEventValueArray[i].HasValue)
+                                            replay.ClientListByWorkingSetSlotID[i].ScoreResult.ClutchHealsPerformed = scoreResultEventValueArray[i].Value;
+                                    break;
+                                case "EscapesPerformed":
+                                    for (var i = 0; i < scoreResultEventValueArray.Length; i++)
+                                        if (scoreResultEventValueArray[i].HasValue)
+                                            replay.ClientListByWorkingSetSlotID[i].ScoreResult.EscapesPerformed = scoreResultEventValueArray[i].Value;
+                                    break;
+                                case "VengeancesPerformed":
+                                    for (var i = 0; i < scoreResultEventValueArray.Length; i++)
+                                        if (scoreResultEventValueArray[i].HasValue)
+                                            replay.ClientListByWorkingSetSlotID[i].ScoreResult.VengeancesPerformed = scoreResultEventValueArray[i].Value;
+                                    break;
+                                case "OutnumberedDeaths":
+                                    for (var i = 0; i < scoreResultEventValueArray.Length; i++)
+                                        if (scoreResultEventValueArray[i].HasValue)
+                                            replay.ClientListByWorkingSetSlotID[i].ScoreResult.OutnumberedDeaths = scoreResultEventValueArray[i].Value;
+                                    break;
+                                case "TeamfightEscapesPerformed":
+                                    for (var i = 0; i < scoreResultEventValueArray.Length; i++)
+                                        if (scoreResultEventValueArray[i].HasValue)
+                                            replay.ClientListByWorkingSetSlotID[i].ScoreResult.TeamfightEscapesPerformed = scoreResultEventValueArray[i].Value;
+                                    break;
+                                case "TeamfightHealingDone":
+                                    for (var i = 0; i < scoreResultEventValueArray.Length; i++)
+                                        if (scoreResultEventValueArray[i].HasValue)
+                                            replay.ClientListByWorkingSetSlotID[i].ScoreResult.TeamfightHealingDone = scoreResultEventValueArray[i].Value;
+                                    break;
+                                case "TeamfightDamageTaken":
+                                    for (var i = 0; i < scoreResultEventValueArray.Length; i++)
+                                        if (scoreResultEventValueArray[i].HasValue)
+                                            replay.ClientListByWorkingSetSlotID[i].ScoreResult.TeamfightDamageTaken = scoreResultEventValueArray[i].Value;
+                                    break;
+                                case "TeamfightHeroDamage":
+                                    for (var i = 0; i < scoreResultEventValueArray.Length; i++)
+                                        if (scoreResultEventValueArray[i].HasValue)
+                                            replay.ClientListByWorkingSetSlotID[i].ScoreResult.TeamfightHeroDamage = scoreResultEventValueArray[i].Value;
+                                    break;
+
+                                case "Multikill":
+                                    for (var i = 0; i < scoreResultEventValueArray.Length; i++)
+                                        if (scoreResultEventValueArray[i].HasValue)
+                                            replay.ClientListByWorkingSetSlotID[i].ScoreResult.Multikill = scoreResultEventValueArray[i].Value;
+                                    break;
+                                case "PhysicalDamage":
+                                    for (var i = 0; i < scoreResultEventValueArray.Length; i++)
+                                        if (scoreResultEventValueArray[i].HasValue)
+                                            replay.ClientListByWorkingSetSlotID[i].ScoreResult.PhysicalDamage = scoreResultEventValueArray[i].Value;
+                                    break;
+                                case "SpellDamage":
+                                    for (var i = 0; i < scoreResultEventValueArray.Length; i++)
+                                        if (scoreResultEventValueArray[i].HasValue)
+                                            replay.ClientListByWorkingSetSlotID[i].ScoreResult.SpellDamage = scoreResultEventValueArray[i].Value;
                                     break;
 
                                 case "EndOfMatchAwardMVPBoolean":
@@ -654,8 +758,9 @@ namespace Heroes.ReplayParser
 								case "EndOfMatchAwardMostTimePushingBoolean":
 								case "EndOfMatchAwardMostTimeOnPointBoolean":
 								case "EndOfMatchAwardMostInterruptedCageUnlocksBoolean":
+                                case "EndOfMatchAwardMostSeedsCollectedBoolean":
 
-								case "EndOfMatchAwardMostKillsBoolean":
+                                case "EndOfMatchAwardMostKillsBoolean":
                                 case "EndOfMatchAwardHatTrickBoolean":
                                 case "EndOfMatchAwardClutchHealerBoolean":
                                 case "EndOfMatchAwardMostProtectionBoolean":
@@ -750,8 +855,11 @@ namespace Heroes.ReplayParser
 												case "EndOfMatchAwardMostInterruptedCageUnlocksBoolean":
 													replay.ClientListByWorkingSetSlotID[i].ScoreResult.MatchAwards.Add(MatchAwardType.MostInterruptedCageUnlocks);
 													break;
+                                                case "EndOfMatchAwardMostSeedsCollectedBoolean":
+                                                    replay.ClientListByWorkingSetSlotID[i].ScoreResult.MatchAwards.Add(MatchAwardType.MostSeedsCollected);
+                                                    break;
 
-												case "EndOfMatchAwardMostKillsBoolean":
+                                                case "EndOfMatchAwardMostKillsBoolean":
                                                     replay.ClientListByWorkingSetSlotID[i].ScoreResult.MatchAwards.Add(MatchAwardType.MostKills);
                                                     break;
                                                 case "EndOfMatchAwardHatTrickBoolean":
@@ -807,21 +915,6 @@ namespace Heroes.ReplayParser
 								case "TouchByBlightPlague":
 								case "Difficulty": // First seen in 'Escape From Braxis' PvE Brawl
 
-								// New Stats Added in PTR 12/6/2016
-								// Currently all 0 values - if these are filled in, let's add them to the Player.ScoreResult object
-								case "ProtectionGivenToAllies":
-                                case "TimeSilencingEnemyHeroes":
-                                case "TimeRootingEnemyHeroes":
-                                case "TimeStunningEnemyHeroes":
-                                case "ClutchHealsPerformed":
-                                case "EscapesPerformed":
-                                case "VengeancesPerformed":
-                                case "OutnumberedDeaths":
-                                case "TeamfightEscapesPerformed":
-                                case "TeamfightHealingDone":
-                                case "TeamfightDamageTaken":
-                                case "TeamfightHeroDamage":
-
                                 // Map Objectives
                                 case "DamageDoneToZerg":
                                 case "DamageDoneToShrineMinions":
@@ -842,9 +935,10 @@ namespace Heroes.ReplayParser
 								case "TimeOnPayload":
 								case "TimeOnPoint":
 								case "CageUnlocksInterrupted":
+                                case "GardenSeedsCollectedByPlayer":
 
-								// Special Events
-								case "LunarNewYearEventCompleted":           // Early 2016
+                                // Special Events
+                                case "LunarNewYearEventCompleted":           // Early 2016
                                 case "LunarNewYearSuccesfulArtifactTurnIns": // Early 2017
                                 case "LunarNewYearRoosterEventCompleted":    // Early 2017
                                 case "KilledTreasureGoblin":
