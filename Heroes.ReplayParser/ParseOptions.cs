@@ -36,7 +36,7 @@ namespace Heroes.ReplayParser
         {
             ShouldParseEvents = false,
             ShouldParseUnits = false,
-            ShouldParseMouseEvents = false
+            ShouldParseMouseEvents = false,
             ShouldParseDetaileBattleLobby = true,   
         };
 
