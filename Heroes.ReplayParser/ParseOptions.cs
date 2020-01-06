@@ -37,7 +37,7 @@ namespace Heroes.ReplayParser
             ShouldParseEvents = false,
             ShouldParseUnits = false,
             ShouldParseMouseEvents = false,
-            ShouldParseDetaileBattleLobby = true,   
+            ShouldParseDetaileBattleLobby = true
         };
 
         public static ParseOptions MinimalParsing => new ParseOptions()
