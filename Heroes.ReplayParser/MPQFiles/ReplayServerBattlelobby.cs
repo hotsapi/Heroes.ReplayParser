@@ -7,6 +7,7 @@
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
     using System.Linq;
+    using System.Runtime.Serialization;
 
     /// <summary> Parses the replay.server.battlelobby file in the replay file. </summary>
     public class ReplayServerBattlelobby
@@ -681,12 +682,15 @@
         //}
     }
 
+    [Serializable]
     public class DetailedParsedException : Exception
     {
         public DetailedParsedException(string message)
             : base(message)
         {
         }
+
+        protected DetailedParsedException(SerializationInfo serializationInfo, StreamingContext streamingContext) : base(serializationInfo, streamingContext) { }
     }
 }
 

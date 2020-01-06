@@ -33,7 +33,7 @@ using System.IO;
 
 namespace Foole.Mpq
 {
-    public class MpqArchive : IDisposable, IEnumerable<MpqEntry>
+    sealed public class MpqArchive : IDisposable, IEnumerable<MpqEntry>
     {
         private MpqHeader _mpqHeader;
         private long _headerOffset;

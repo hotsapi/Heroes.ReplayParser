@@ -49,7 +49,7 @@ namespace Foole.Mpq
         public LinkedNode(int decompVal, int weight)
         {
             DecompressedValue = decompVal;
-            this.Weight = weight;
+            Weight = weight;
         }
 
         // TODO: This would be more efficient as a member of the other class

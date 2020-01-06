@@ -20,7 +20,7 @@
         public BitReader(Stream stream)
         {
             this.stream = stream;
-            this.Cursor = 0;
+            Cursor = 0;
         }
 
         /// <summary>
@@ -35,7 +35,7 @@
         {
             get
             {
-                return (this.Cursor >> 3) == this.stream.Length;
+                return (Cursor >> 3) == stream.Length;
             }
         }
 
@@ -62,17 +62,17 @@
 
             while (numBits > 0)
             {
-                var bytePos = this.Cursor & 7;
+                var bytePos = Cursor & 7;
                 int bitsLeftInByte = 8 - bytePos;
                 if (bytePos == 0)
                 {
-                    this.currentByte = this.stream.ReadByte();
+                    currentByte = stream.ReadByte();
                 }
 
                 var bitsToRead = (bitsLeftInByte > numBits) ? numBits : bitsLeftInByte;
 
-                value = (value << bitsToRead) | ((uint)this.currentByte >> bytePos) & ((1u << bitsToRead) - 1u);
-                this.Cursor += bitsToRead;
+                value = (value << bitsToRead) | ((uint)currentByte >> bytePos) & ((1u << bitsToRead) - 1u);
+                Cursor += bitsToRead;
                 numBits -= bitsToRead;
             }
 
@@ -87,15 +87,15 @@
         {
             // todo: calculade number of bytes to skip and just increment this.stream position
             while (numBits > 0) {
-                var bytePos = this.Cursor & 7;
+                var bytePos = Cursor & 7;
                 int bitsLeftInByte = 8 - bytePos;
                 if (bytePos == 0) {
-                    this.currentByte = this.stream.ReadByte();
+                    currentByte = stream.ReadByte();
                 }
 
                 var bitsToRead = (bitsLeftInByte > numBits) ? numBits : bitsLeftInByte;
                 
-                this.Cursor += bitsToRead;
+                Cursor += bitsToRead;
                 numBits -= bitsToRead;
             }
         }
@@ -105,9 +105,9 @@
         /// </summary>
         public void AlignToByte()
         {
-            if ((this.Cursor & 7) > 0)
+            if ((Cursor & 7) > 0)
             {
-                this.Cursor = (this.Cursor & 0x7ffffff8) + 8;
+                Cursor = (Cursor & 0x7ffffff8) + 8;
             }
         }
 
@@ -116,10 +116,7 @@
         /// </summary>
         /// <param name="numBits">Number of bits to read, up to 32.</param>
         /// <returns>Returns a uint containing the number of bits read.</returns>
-        public uint Read(uint numBits)
-        {
-            return this.Read((int)numBits);
-        }
+        public uint Read(uint numBits) => Read((int)numBits);
 
         public bool[] ReadBitArray(uint numBits)
         {
@@ -136,10 +133,7 @@
         /// <returns>
         /// The <see cref="byte"/>.
         /// </returns>
-        public byte ReadByte()
-        {
-            return (byte)this.Read(8);
-        }
+        public byte ReadByte() => (byte)Read(8);
 
         /// <summary>
         /// Reads a single bit from the stream as a boolean.
@@ -147,10 +141,7 @@
         /// <returns>
         /// The <see cref="bool"/>.
         /// </returns>
-        public bool ReadBoolean()
-        {
-            return this.Read(1) == 1;
-        }
+        public bool ReadBoolean() => Read(1) == 1;
 
         /// <summary>
         /// Reads 2 bytes from the stream as a short.
@@ -158,10 +149,7 @@
         /// <returns>
         /// The <see cref="short"/>.
         /// </returns>
-        public short ReadInt16()
-        {
-            return (short)this.Read(16);
-        }
+        public short ReadInt16() => (short)Read(16);
 
         /// <summary>
         /// Reads 4 bytes from the stream as an int.
@@ -169,10 +157,7 @@
         /// <returns>
         /// The <see cref="int"/>.
         /// </returns>
-        public int ReadInt32()
-        {
-            return (int)this.Read(32);
-        }
+        public int ReadInt32() => (int)Read(32);
 
         /// <summary>
         /// Reads an array of bytes from the stream.
@@ -188,7 +173,7 @@
             var buffer = new byte[bytes];
             for (int i = 0; i < bytes; i++)
             {
-                buffer[i] = this.ReadByte();
+                buffer[i] = ReadByte();
             }
 
             return buffer;
@@ -205,7 +190,7 @@
         /// </returns>
         public string ReadString(int length)
         {
-            var buffer = this.ReadBytes(length);
+            var buffer = ReadBytes(length);
             return Encoding.UTF8.GetString(buffer);
         }
 
