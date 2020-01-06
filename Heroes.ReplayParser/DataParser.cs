@@ -167,14 +167,14 @@ namespace Heroes.ReplayParser
                     foreach (var player in talentGameEventsDictionary.Keys)
                         player.Talents = talentGameEventsDictionary[player];
                 }
-	            // Replay Server Battlelobby
-	            if (!ignoreErrors && archive.Any(i => i.Filename == ReplayServerBattlelobby.FileName))
-	            {
-	                if (detailedBattleLobbyParsing)
-	                    ReplayServerBattlelobby.Parse(replay, GetMpqFile(archive, ReplayServerBattlelobby.FileName));
-	                else
-	                    ReplayServerBattlelobby.GetBattleTags(replay, GetMpqFile(archive, ReplayServerBattlelobby.FileName));
-	            }
+                // Replay Server Battlelobby
+                if (!ignoreErrors && archive.Any(i => i.Filename == ReplayServerBattlelobby.FileName))
+                {
+                    if (detailedBattleLobbyParsing)
+                        ReplayServerBattlelobby.Parse(replay, GetMpqFile(archive, ReplayServerBattlelobby.FileName));
+                    else
+                        ReplayServerBattlelobby.GetBattleTags(replay, GetMpqFile(archive, ReplayServerBattlelobby.FileName));
+                }
 
                 // Parse Unit Data using Tracker events
                 if (!skipUnitParsing) {

@@ -10,9 +10,13 @@ namespace ParserConsole
     {
         static void Main(string[] args)
         {
+            string pattern = "*.StormReplay";
+            if(args.Length >= 1)
+            {
+                pattern = args[0];
+            }
             var heroesAccountsFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), @"Heroes of the Storm\Accounts");
-            //var randomReplayFileName = Directory.GetFiles(heroesAccountsFolder, "*.StormReplay", SearchOption.AllDirectories).OrderBy(i => Guid.NewGuid()).First();
-            var randomReplayFileName = @"C:\Users\koliva\Documents\Heroes of the Storm\ReplayDetail\Infernal Shrines (127).StormReplay";
+            var randomReplayFileName = Directory.GetFiles(heroesAccountsFolder, pattern, SearchOption.AllDirectories).OrderBy(i => Guid.NewGuid()).First();
             // Use temp directory for MpqLib directory permissions requirements
             var tmpPath = Path.GetTempFileName();
             File.Copy(randomReplayFileName, tmpPath, overwrite: true);

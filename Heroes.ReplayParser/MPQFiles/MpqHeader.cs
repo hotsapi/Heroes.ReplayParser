@@ -41,12 +41,12 @@
 
             replay.ReplayBuild = (int)headerStructure.dictionary[1].dictionary[4].vInt.Value;
 
-			if(replay.ReplayBuild >= 51978)
-				replay.ReplayVersionMajor = (int)headerStructure.dictionary[1].dictionary[1].vInt.Value;
-			else
-				replay.ReplayVersionMajor = 1;
+            if(replay.ReplayBuild >= 51978)
+                replay.ReplayVersionMajor = (int)headerStructure.dictionary[1].dictionary[1].vInt.Value;
+            else
+                replay.ReplayVersionMajor = 1;
 
-			if (replay.ReplayBuild >= 39951)
+            if (replay.ReplayBuild >= 39951)
                 // 'm_dataBuildNum' may have always been incremented for these smaller 'hotfix' patches, but build 39951 is the first time I've noticed where a Hero's available talent selection has changed in one of these smaller patches
                 // We probably want to use this as the most precise build number from now on
                 replay.ReplayBuild = (int)headerStructure.dictionary[6].vInt.Value;

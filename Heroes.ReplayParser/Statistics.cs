@@ -107,18 +107,18 @@ namespace Heroes.ReplayParser
             var playerIDTalentIndexDictionary = new Dictionary<int, int>();
 
             foreach (var trackerEvent in replay.TrackerEvents.Where(i =>
-				i.TrackerEventType == ReplayTrackerEvents.TrackerEventType.PlayerSetupEvent ||
+                i.TrackerEventType == ReplayTrackerEvents.TrackerEventType.PlayerSetupEvent ||
                 i.TrackerEventType == ReplayTrackerEvents.TrackerEventType.HeroBannedEvent ||
                 i.TrackerEventType == ReplayTrackerEvents.TrackerEventType.HeroPickedEvent ||
                 i.TrackerEventType == ReplayTrackerEvents.TrackerEventType.HeroSwappedEvent ||
                 i.TrackerEventType == ReplayTrackerEvents.TrackerEventType.UpgradeEvent ||
-				i.TrackerEventType == ReplayTrackerEvents.TrackerEventType.StatGameEvent ||
-				i.TrackerEventType == ReplayTrackerEvents.TrackerEventType.ScoreResultEvent))
+                i.TrackerEventType == ReplayTrackerEvents.TrackerEventType.StatGameEvent ||
+                i.TrackerEventType == ReplayTrackerEvents.TrackerEventType.ScoreResultEvent))
                 switch (trackerEvent.TrackerEventType)
                 {
-					case ReplayTrackerEvents.TrackerEventType.PlayerSetupEvent:
-						playerIDDictionary[(int)trackerEvent.Data.dictionary[0].vInt.Value] = replay.ClientListByWorkingSetSlotID[(int)trackerEvent.Data.dictionary[3].optionalData.vInt.Value];
-						break;
+                    case ReplayTrackerEvents.TrackerEventType.PlayerSetupEvent:
+                        playerIDDictionary[(int)trackerEvent.Data.dictionary[0].vInt.Value] = replay.ClientListByWorkingSetSlotID[(int)trackerEvent.Data.dictionary[3].optionalData.vInt.Value];
+                        break;
                     case ReplayTrackerEvents.TrackerEventType.HeroBannedEvent:
                         replay.DraftOrder.Add(new DraftPick()
                         {
@@ -171,25 +171,25 @@ namespace Heroes.ReplayParser
                                 break;
 
                             case "GatesAreOpen":
-							case "NecromancerEchoesOfDeathTalentUpgrade":
+                            case "NecromancerEchoesOfDeathTalentUpgrade":
                             case "MinionsAreSpawning":
                             case "GallTalentNetherCallsUpgrade":
-							case "GallDreadOrbDoubleBackTalentUpgrade":
-							case "TracerJumperButtonSwap":
-							case "DisplayLockedMapMechanicAbility":
+                            case "GallDreadOrbDoubleBackTalentUpgrade":
+                            case "TracerJumperButtonSwap":
+                            case "DisplayLockedMapMechanicAbility":
                                 // Not really interested in these
                                 break;
 
                             case "VehicleDragonUpgrade":
                                 break;
 
-							case "VolskayaVehicleUpgrade":
-							case "VolskayaVehicleGunnerUpgrade":
-								// FYI: Something is unusual with the PlayerID provided with this event
-								// I'm not sure what it is pointing to
-								break;
+                            case "VolskayaVehicleUpgrade":
+                            case "VolskayaVehicleGunnerUpgrade":
+                                // FYI: Something is unusual with the PlayerID provided with this event
+                                // I'm not sure what it is pointing to
+                                break;
 
-							case "NovaSnipeMasterDamageUpgrade":
+                            case "NovaSnipeMasterDamageUpgrade":
                                 playerIDDictionary[(int) trackerEvent.Data.dictionary[0].vInt.Value].UpgradeEvents.Add(new UpgradeEvent {
                                     TimeSpan = trackerEvent.TimeSpan,
                                     UpgradeEventType = UpgradeEventType.NovaSnipeMasterDamageUpgrade,
@@ -203,12 +203,12 @@ namespace Heroes.ReplayParser
                                     Value = (int) trackerEvent.Data.dictionary[2].vInt.Value });
                                 break;
 
-							case "WitchDoctorPlagueofToadsPandemicTalentCompletion":
-								playerIDDictionary[(int) trackerEvent.Data.dictionary[0].vInt.Value].UpgradeEvents.Add(new UpgradeEvent {
+                            case "WitchDoctorPlagueofToadsPandemicTalentCompletion":
+                                playerIDDictionary[(int) trackerEvent.Data.dictionary[0].vInt.Value].UpgradeEvents.Add(new UpgradeEvent {
                                     TimeSpan = trackerEvent.TimeSpan,
                                     UpgradeEventType = UpgradeEventType.WitchDoctorPlagueofToadsPandemicTalentCompletion,
                                     Value = (int) trackerEvent.Data.dictionary[2].vInt.Value });
-								break;
+                                break;
 
                             default:
                                 // New Upgrade Event - let's log it until we can identify and properly track it
@@ -319,12 +319,12 @@ namespace Heroes.ReplayParser
                             case "RegenGlobePickedUp": break;       // {StatGameEvent: {"RegenGlobePickedUp", , [{{"PlayerID"}, 1}], }}
                             case "ChoGall Cho Spawn Error": break;  // {StatGameEvent: {"ChoGall Cho Spawn Error", , [{{"PlayerID"}, 6}], }}
                             case "ChoGall Gall Spawn Error": break; // {StatGameEvent: {"ChoGall Gall Spawn Error", , [{{"PlayerID"}, 6}], }}
-							case "LootSprayUsed": break;            // {StatGameEvent: {"LootSprayUsed", [{{"MapID"}, "CursedHollow"}, {{"PlayerHandle"}, "98-Hero-1-640036"}, {{"SprayID"}, "SprayStaticFluidDefault"}, {{"HeroID"}, "HeroWizard"}], [{{"PlayerID"}, 9}, {{"IsWheel"}, 0}], [{{"XLoc"}, 193}, {{"YLoc"}, 114}]}}
-							case "LootVoiceLineUsed": break;        // {StatGameEvent: {"LootVoiceLineUsed", [{{"MapID"}, "CursedHollow"}, {{"PlayerHandle"}, "98-Hero-1-95259"}, {{"VoiceLineID"}, "AurielBase_VoiceLine01"}, {{"HeroID"}, "HeroAuriel"}], [{{"PlayerID"}, 1}, {{"IsWheel"}, 0}], [{{"XLoc"}, 55}, {{"YLoc"}, 104}]}}
-							case "LootWheelUsed": break;            // {StatGameEvent: {"LootWheelUsed", [{{"MapID"}, "CursedHollow"}, {{"PlayerHandle"}, "98-Hero-1-16757"}, {{"WheelAction"}, "Taunt"}, {{"HeroID"}, "HeroValeera"}], [{{"PlayerID"}, 5}], [{{"XLoc"}, 143}, {{"YLoc"}, 81}]}}
-							case "PlayerHitBySnowball": break;		// {StatGameEvent: {"PlayerHitBySnowball", , [{{"CasterPlayerID"}, 1}, {{"TargetPlayerID"}, 12}], }}
+                            case "LootSprayUsed": break;            // {StatGameEvent: {"LootSprayUsed", [{{"MapID"}, "CursedHollow"}, {{"PlayerHandle"}, "98-Hero-1-640036"}, {{"SprayID"}, "SprayStaticFluidDefault"}, {{"HeroID"}, "HeroWizard"}], [{{"PlayerID"}, 9}, {{"IsWheel"}, 0}], [{{"XLoc"}, 193}, {{"YLoc"}, 114}]}}
+                            case "LootVoiceLineUsed": break;        // {StatGameEvent: {"LootVoiceLineUsed", [{{"MapID"}, "CursedHollow"}, {{"PlayerHandle"}, "98-Hero-1-95259"}, {{"VoiceLineID"}, "AurielBase_VoiceLine01"}, {{"HeroID"}, "HeroAuriel"}], [{{"PlayerID"}, 1}, {{"IsWheel"}, 0}], [{{"XLoc"}, 55}, {{"YLoc"}, 104}]}}
+                            case "LootWheelUsed": break;            // {StatGameEvent: {"LootWheelUsed", [{{"MapID"}, "CursedHollow"}, {{"PlayerHandle"}, "98-Hero-1-16757"}, {{"WheelAction"}, "Taunt"}, {{"HeroID"}, "HeroValeera"}], [{{"PlayerID"}, 5}], [{{"XLoc"}, 143}, {{"YLoc"}, 81}]}}
+                            case "PlayerHitBySnowball": break;		// {StatGameEvent: {"PlayerHitBySnowball", , [{{"CasterPlayerID"}, 1}, {{"TargetPlayerID"}, 12}], }}
 
-							case "EndOfGameRegenMasterStacks":      // {StatGameEvent: {"EndOfGameRegenMasterStacks", [{{"Hero"}, "HeroZeratul"}], [{{"PlayerID"}, 7}, {{"Stack Count"}, 23}], }}
+                            case "EndOfGameRegenMasterStacks":      // {StatGameEvent: {"EndOfGameRegenMasterStacks", [{{"Hero"}, "HeroZeratul"}], [{{"PlayerID"}, 7}, {{"Stack Count"}, 23}], }}
                                 playerIDDictionary[(int) trackerEvent.Data.dictionary[2].optionalData.array[0].dictionary[1].vInt.Value].UpgradeEvents.Add(new UpgradeEvent {
                                     TimeSpan = trackerEvent.TimeSpan,
                                     UpgradeEventType = UpgradeEventType.RegenMasterStacks,
@@ -366,13 +366,13 @@ namespace Heroes.ReplayParser
                             case "TownStructureDeath": break;       // {StatGameEvent: {"TownStructureDeath", , [{{"TownID"}, 8}, {{"KillingPlayer"}, 1}, {{"KillingPlayer"}, 2}, {{"KillingPlayer"}, 3}, {{"KillingPlayer"}, 4}, {{"KillingPlayer"}, 5}], }}
                             case "EndOfGameTimeSpentDead": break;   // {StatGameEvent: {"EndOfGameTimeSpentDead", , [{{"PlayerID"}, 2}], [{{"Time"}, 162}]}}
 
-							case "Pickup Spawned": break;           // {StatGameEvent: {"Pickup Spawned", [{{"Pickup Type"}, "PVERejuvenationPulsePickup"}], , }} - This is for the 'Escape From Braxis' PvE Brawl
-							case "Pickup Used": break;              // {StatGameEvent: {"Pickup Used", [{{"Pickup Type"}, "Rejuvenation Pulse"}], [{{"PlayerID"}, 5}], }}
+                            case "Pickup Spawned": break;           // {StatGameEvent: {"Pickup Spawned", [{{"Pickup Type"}, "PVERejuvenationPulsePickup"}], , }} - This is for the 'Escape From Braxis' PvE Brawl
+                            case "Pickup Used": break;              // {StatGameEvent: {"Pickup Used", [{{"Pickup Type"}, "Rejuvenation Pulse"}], [{{"PlayerID"}, 5}], }}
 
-							// Map Objectives
+                            // Map Objectives
 
-								// Towers of Doom
-							case "Altar Captured":                  // {StatGameEvent: {"Altar Captured", , [{{"Firing Team"}, 2}, {{"Towns Owned"}, 3}], }}
+                                // Towers of Doom
+                            case "Altar Captured":                  // {StatGameEvent: {"Altar Captured", , [{{"Firing Team"}, 2}, {{"Towns Owned"}, 3}], }}
                                 replay.TeamObjectives[trackerEvent.Data.dictionary[2].optionalData.array[0].dictionary[1].vInt.Value - 1].Add(new TeamObjective {
                                     TimeSpan = trackerEvent.TimeSpan,
                                     TeamObjectiveType = TeamObjectiveType.TowersOfDoomAltarCapturedWithTeamTownsOwned,
@@ -471,57 +471,57 @@ namespace Heroes.ReplayParser
                                     Value = (int) trackerEvent.Data.dictionary[3].optionalData.array[1].dictionary[1].vInt.Value });
                                 break;
 
-								// Haunted Mines
+                                // Haunted Mines
                             case "GolemLanes": break;               // {StatGameEvent: {"GolemLanes", , [{{"TopGolemTeam"}, 1}, {{"BottomGolemTeam"}, 2}], }}
-							case "HauntedMinesGolemsSpawned": break;
-							case "GraveGolemSpawned":               // {StatGameEvent: {"GraveGolemSpawned", , [{{"Event"}, 1}], [{{"TeamID"}, 2}, {{"SkullCount"}, 34}]}}
+                            case "HauntedMinesGolemsSpawned": break;
+                            case "GraveGolemSpawned":               // {StatGameEvent: {"GraveGolemSpawned", , [{{"Event"}, 1}], [{{"TeamID"}, 2}, {{"SkullCount"}, 34}]}}
                                 replay.TeamObjectives[trackerEvent.Data.dictionary[3].optionalData.array[0].dictionary[1].vInt.Value - 1].Add(new TeamObjective {
                                     TimeSpan = trackerEvent.TimeSpan,
                                     TeamObjectiveType = TeamObjectiveType.HauntedMinesGraveGolemSpawnedWithSkullCount,
                                     Value = (int) trackerEvent.Data.dictionary[3].optionalData.array[1].dictionary[1].vInt.Value });
                                 break;
 
-								// Dragon Shire - This is populated using Unit data at the top of this function
+                                // Dragon Shire - This is populated using Unit data at the top of this function
                             case "DragonKnightActivated": break;    // {StatGameEvent: {"DragonKnightActivated", , [{{"Event"}, 1}], [{{"TeamID"}, 2}]}}
 
-								// Warhead Junction
-							case "WarheadJunctionNukesSpawned": break;
-							case "WarheadJunctionNukeCollected": break;
-							case "WarheadJunctionNukeFired": break;
-							case "WarheadJunctionNukeDropped": break;
+                                // Warhead Junction
+                            case "WarheadJunctionNukesSpawned": break;
+                            case "WarheadJunctionNukeCollected": break;
+                            case "WarheadJunctionNukeFired": break;
+                            case "WarheadJunctionNukeDropped": break;
 
-								// Volskaya Foundry
-							case "VolskayaCapturePointComplete": break;
-							case "VolskayaCapturePointSpawned": break;
+                                // Volskaya Foundry
+                            case "VolskayaCapturePointComplete": break;
+                            case "VolskayaCapturePointSpawned": break;
 
-								// Braxis Holdout
-							case "BraxisHoldoutMapEventComplete": break;
+                                // Braxis Holdout
+                            case "BraxisHoldoutMapEventComplete": break;
 
-							case "Game Results": // {StatGameEvent: {"Game Results", [{{"Map Name"}, "Escape from Braxis"}, {{"Difficulty"}, "Normal"}, {{"Map Complete"}, "True"}], [{{"Stage 1 Time"}, 168}, {{"Stage 2 Time"}, 453}, {{"Victory Time"}, 578}, {{"Victory Time Loop"}, 9252}], }}
-								if (trackerEvent.Data.dictionary[1].optionalData.array[0].dictionary[1].blobText == "Escape from Braxis" && trackerEvent.Data.dictionary[1].optionalData.array[2].dictionary[1].blobText == "True")
-								{
-									// Escape From Braxis
-									var difficulty = trackerEvent.Data.dictionary[1].optionalData.array[1].dictionary[1].blobText;
+                            case "Game Results": // {StatGameEvent: {"Game Results", [{{"Map Name"}, "Escape from Braxis"}, {{"Difficulty"}, "Normal"}, {{"Map Complete"}, "True"}], [{{"Stage 1 Time"}, 168}, {{"Stage 2 Time"}, 453}, {{"Victory Time"}, 578}, {{"Victory Time Loop"}, 9252}], }}
+                                if (trackerEvent.Data.dictionary[1].optionalData.array[0].dictionary[1].blobText == "Escape from Braxis" && trackerEvent.Data.dictionary[1].optionalData.array[2].dictionary[1].blobText == "True")
+                                {
+                                    // Escape From Braxis
+                                    var difficulty = trackerEvent.Data.dictionary[1].optionalData.array[1].dictionary[1].blobText;
 
-									replay.TeamObjectives[0].Add(new TeamObjective {
-										TimeSpan = TimeSpan.Zero,
-										TeamObjectiveType = TeamObjectiveType.EscapeFromBraxisDifficulty,
-										Value = difficulty == "Normal" ? 0 : difficulty == "Hard" ? 1 : 2 });
+                                    replay.TeamObjectives[0].Add(new TeamObjective {
+                                        TimeSpan = TimeSpan.Zero,
+                                        TeamObjectiveType = TeamObjectiveType.EscapeFromBraxisDifficulty,
+                                        Value = difficulty == "Normal" ? 0 : difficulty == "Hard" ? 1 : 2 });
 
-									var stageTimes = trackerEvent.Data.dictionary[2].optionalData.array.Take(3).Select(i => new TimeSpan(0, 0, (int)i.dictionary[1].vInt.Value)).ToArray();
-									var victoryTime = stageTimes.Last();
+                                    var stageTimes = trackerEvent.Data.dictionary[2].optionalData.array.Take(3).Select(i => new TimeSpan(0, 0, (int)i.dictionary[1].vInt.Value)).ToArray();
+                                    var victoryTime = stageTimes.Last();
 
-									for (var i = 0; i < stageTimes.Length; i++)
-										replay.TeamObjectives[0].Add(new TeamObjective {
-											TimeSpan = stageTimes[i],
-											TeamObjectiveType = TeamObjectiveType.EscapeFromBraxisCheckpoint,
-											Value = i < stageTimes.Length - 1 ? i + 1 : 9 });
+                                    for (var i = 0; i < stageTimes.Length; i++)
+                                        replay.TeamObjectives[0].Add(new TeamObjective {
+                                            TimeSpan = stageTimes[i],
+                                            TeamObjectiveType = TeamObjectiveType.EscapeFromBraxisCheckpoint,
+                                            Value = i < stageTimes.Length - 1 ? i + 1 : 9 });
 
-									replay.Frames = (int)(victoryTime.TotalSeconds * 16);
-								}
-								break;
+                                    replay.Frames = (int)(victoryTime.TotalSeconds * 16);
+                                }
+                                break;
 
-							case "EndOfGameUpVotesCollected": break;// {StatGameEvent: {"EndOfGameUpVotesCollected", , [{{"Player"}, 10}, {{"Voter"}, 10}, {{"UpVotesReceived"}, 1}], }}
+                            case "EndOfGameUpVotesCollected": break;// {StatGameEvent: {"EndOfGameUpVotesCollected", , [{{"Player"}, 10}, {{"Voter"}, 10}, {{"UpVotesReceived"}, 1}], }}
 
                             default:
                                 // New Stat Game Event - let's log it until we can identify and properly track it
@@ -615,12 +615,12 @@ namespace Heroes.ReplayParser
                                         if (scoreResultEventValueArray[i].HasValue && scoreResultEventValueArray[i].Value > 0)
                                             replay.ClientListByWorkingSetSlotID[i].ScoreResult.DamageTaken = scoreResultEventValueArray[i].Value;
                                     break;
-								case "DamageSoaked":
-									for(var i = 0; i < scoreResultEventValueArray.Length; i++)
-										if(scoreResultEventValueArray[i].HasValue && scoreResultEventValueArray[i].Value > 0)
-											replay.ClientListByWorkingSetSlotID[i].ScoreResult.DamageSoaked = scoreResultEventValueArray[i].Value;
-									break;
-								case "ExperienceContribution":
+                                case "DamageSoaked":
+                                    for(var i = 0; i < scoreResultEventValueArray.Length; i++)
+                                        if(scoreResultEventValueArray[i].HasValue && scoreResultEventValueArray[i].Value > 0)
+                                            replay.ClientListByWorkingSetSlotID[i].ScoreResult.DamageSoaked = scoreResultEventValueArray[i].Value;
+                                    break;
+                                case "ExperienceContribution":
                                     for (var i = 0; i < scoreResultEventValueArray.Length; i++)
                                         if (scoreResultEventValueArray[i].HasValue)
                                             replay.ClientListByWorkingSetSlotID[i].ScoreResult.ExperienceContribution = scoreResultEventValueArray[i].Value;
@@ -754,10 +754,10 @@ namespace Heroes.ReplayParser
                                 case "EndOfMatchAwardMostGemsTurnedInBoolean":
                                 case "EndOfMatchAwardMostAltarDamageDone":
                                 case "EndOfMatchAwardMostNukeDamageDoneBoolean":
-								case "EndOfMatchAwardMostSkullsCollectedBoolean":
-								case "EndOfMatchAwardMostTimePushingBoolean":
-								case "EndOfMatchAwardMostTimeOnPointBoolean":
-								case "EndOfMatchAwardMostInterruptedCageUnlocksBoolean":
+                                case "EndOfMatchAwardMostSkullsCollectedBoolean":
+                                case "EndOfMatchAwardMostTimePushingBoolean":
+                                case "EndOfMatchAwardMostTimeOnPointBoolean":
+                                case "EndOfMatchAwardMostInterruptedCageUnlocksBoolean":
                                 case "EndOfMatchAwardMostSeedsCollectedBoolean":
 
                                 case "EndOfMatchAwardMostKillsBoolean":
@@ -843,18 +843,18 @@ namespace Heroes.ReplayParser
                                                 case "EndOfMatchAwardMostNukeDamageDoneBoolean":
                                                     replay.ClientListByWorkingSetSlotID[i].ScoreResult.MatchAwards.Add(MatchAwardType.MostNukeDamageDone);
                                                     break;
-												case "EndOfMatchAwardMostSkullsCollectedBoolean":
-													replay.ClientListByWorkingSetSlotID[i].ScoreResult.MatchAwards.Add(MatchAwardType.MostSkullsCollected);
-													break;
-												case "EndOfMatchAwardMostTimePushingBoolean":
-													replay.ClientListByWorkingSetSlotID[i].ScoreResult.MatchAwards.Add(MatchAwardType.MostTimePushing);
-													break;
-												case "EndOfMatchAwardMostTimeOnPointBoolean":
-													replay.ClientListByWorkingSetSlotID[i].ScoreResult.MatchAwards.Add(MatchAwardType.MostTimeOnPoint);
-													break;
-												case "EndOfMatchAwardMostInterruptedCageUnlocksBoolean":
-													replay.ClientListByWorkingSetSlotID[i].ScoreResult.MatchAwards.Add(MatchAwardType.MostInterruptedCageUnlocks);
-													break;
+                                                case "EndOfMatchAwardMostSkullsCollectedBoolean":
+                                                    replay.ClientListByWorkingSetSlotID[i].ScoreResult.MatchAwards.Add(MatchAwardType.MostSkullsCollected);
+                                                    break;
+                                                case "EndOfMatchAwardMostTimePushingBoolean":
+                                                    replay.ClientListByWorkingSetSlotID[i].ScoreResult.MatchAwards.Add(MatchAwardType.MostTimePushing);
+                                                    break;
+                                                case "EndOfMatchAwardMostTimeOnPointBoolean":
+                                                    replay.ClientListByWorkingSetSlotID[i].ScoreResult.MatchAwards.Add(MatchAwardType.MostTimeOnPoint);
+                                                    break;
+                                                case "EndOfMatchAwardMostInterruptedCageUnlocksBoolean":
+                                                    replay.ClientListByWorkingSetSlotID[i].ScoreResult.MatchAwards.Add(MatchAwardType.MostInterruptedCageUnlocks);
+                                                    break;
                                                 case "EndOfMatchAwardMostSeedsCollectedBoolean":
                                                     replay.ClientListByWorkingSetSlotID[i].ScoreResult.MatchAwards.Add(MatchAwardType.MostSeedsCollected);
                                                     break;
@@ -911,9 +911,9 @@ namespace Heroes.ReplayParser
                                 case "TeamTakedowns":
                                 case "Role":
                                 case "EndOfMatchAwardGivenToNonwinner":
-								case "OnFireTimeOnFire":
-								case "TouchByBlightPlague":
-								case "Difficulty": // First seen in 'Escape From Braxis' PvE Brawl
+                                case "OnFireTimeOnFire":
+                                case "TouchByBlightPlague":
+                                case "Difficulty": // First seen in 'Escape From Braxis' PvE Brawl
 
                                 // Map Objectives
                                 case "DamageDoneToZerg":
@@ -932,9 +932,9 @@ namespace Heroes.ReplayParser
                                 case "BlackheartDoubloonsTurnedIn":
                                 case "MinesSkullsCollected":
                                 case "NukeDamageDone":
-								case "TimeOnPayload":
-								case "TimeOnPoint":
-								case "CageUnlocksInterrupted":
+                                case "TimeOnPayload":
+                                case "TimeOnPoint":
+                                case "CageUnlocksInterrupted":
                                 case "GardenSeedsCollectedByPlayer":
 
                                 // Special Events
@@ -944,10 +944,10 @@ namespace Heroes.ReplayParser
                                 case "KilledTreasureGoblin":
                                 case "StarcraftDailyEventCompleted":
                                 case "StarcraftPiecesCollected":
-								case "PachimariMania":
+                                case "PachimariMania":
 
-								// Talent Selections
-								case "Tier1Talent":
+                                // Talent Selections
+                                case "Tier1Talent":
                                 case "Tier2Talent":
                                 case "Tier3Talent":
                                 case "Tier4Talent":
@@ -959,18 +959,18 @@ namespace Heroes.ReplayParser
                                 case "TeamWinsDiablo":
                                 case "TeamWinsStarCraft":
                                 case "TeamWinsWarcraft":
-								case "TeamWinsOverwatch":
-								case "WinsStarCraft":
+                                case "TeamWinsOverwatch":
+                                case "WinsStarCraft":
                                 case "WinsDiablo":
                                 case "WinsWarcraft":
-								case "WinsOverwatch":
-								case "PlaysStarCraft":
+                                case "WinsOverwatch":
+                                case "PlaysStarCraft":
                                 case "PlaysDiablo":
                                 case "PlaysWarCraft":
-								case "PlaysOverwatch":
+                                case "PlaysOverwatch":
 
-								// Gender Booleans
-								case "TeamWinsFemale":
+                                // Gender Booleans
+                                case "TeamWinsFemale":
                                 case "TeamWinsMale":
                                 case "WinsMale":
                                 case "WinsFemale":

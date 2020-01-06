@@ -332,13 +332,13 @@ namespace Foole.Mpq
         #endregion Strem overrides
 
         /* Compression types in order:
-		 *  10 = BZip2
-		 *   8 = PKLib
-		 *   2 = ZLib
-		 *   1 = Huffman
-		 *  80 = IMA ADPCM Stereo
-		 *  40 = IMA ADPCM Mono
-		 */
+         *  10 = BZip2
+         *   8 = PKLib
+         *   2 = ZLib
+         *   1 = Huffman
+         *  80 = IMA ADPCM Stereo
+         *  40 = IMA ADPCM Mono
+         */
         private static byte[] DecompressMulti(byte[] input, int outputLength)
         {
             Stream sinput = new MemoryStream(input);

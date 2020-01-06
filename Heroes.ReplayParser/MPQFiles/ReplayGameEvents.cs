@@ -136,15 +136,15 @@ namespace Heroes.ReplayParser
                             else if (replayBuild <= 45635)
                                 gameEvent.data.array[0] = new TrackerEventStructure { array = new TrackerEventStructure[26] };
                             else if(replayVersionMajor < 2)
-								gameEvent.data.array[0] = new TrackerEventStructure { array = new TrackerEventStructure[25] };
-							else if (replayBuild < 59837 || replayBuild == 59988 || replayBuild > 62424)
-								gameEvent.data.array[0] = new TrackerEventStructure { array = new TrackerEventStructure[26] };
-							else if (replayBuild < 62833)
-								gameEvent.data.array[0] = new TrackerEventStructure { array = new TrackerEventStructure[27] };
-							else
-								gameEvent.data.array[0] = new TrackerEventStructure { array = new TrackerEventStructure[26] };
+                                gameEvent.data.array[0] = new TrackerEventStructure { array = new TrackerEventStructure[25] };
+                            else if (replayBuild < 59837 || replayBuild == 59988 || replayBuild > 62424)
+                                gameEvent.data.array[0] = new TrackerEventStructure { array = new TrackerEventStructure[26] };
+                            else if (replayBuild < 62833)
+                                gameEvent.data.array[0] = new TrackerEventStructure { array = new TrackerEventStructure[27] };
+                            else
+                                gameEvent.data.array[0] = new TrackerEventStructure { array = new TrackerEventStructure[26] };
 
-							for (var i = 0; i < gameEvent.data.array[0].array.Length; i++)
+                            for (var i = 0; i < gameEvent.data.array[0].array.Length; i++)
                                 gameEvent.data.array[0].array[i] = new TrackerEventStructure { DataType = 7, unsignedInt = bitReader.Read(1) };
 
                             // m_abil
@@ -204,15 +204,15 @@ namespace Heroes.ReplayParser
                                 gameEvent.data.array[4] = new TrackerEventStructure { unsignedInt = bitReader.Read(32) }; // m_unitGroup
                             break;
                         case GameEventType.CSelectionDeltaEvent:
-							gameEvent.data = new TrackerEventStructure { array = new[] {
-								new TrackerEventStructure { unsignedInt = bitReader.Read(4) }, // m_controlGroupId
+                            gameEvent.data = new TrackerEventStructure { array = new[] {
+                                new TrackerEventStructure { unsignedInt = bitReader.Read(4) }, // m_controlGroupId
 
-								// m_delta
-								new TrackerEventStructure { array = new[] {
-									new TrackerEventStructure { unsignedInt = bitReader.Read(replayVersionMajor < 2 ? 9 : 5) }, // m_subgroupIndex
-									new TrackerEventStructure(),
-									new TrackerEventStructure(),
-									new TrackerEventStructure() } } } };
+                                // m_delta
+                                new TrackerEventStructure { array = new[] {
+                                    new TrackerEventStructure { unsignedInt = bitReader.Read(replayVersionMajor < 2 ? 9 : 5) }, // m_subgroupIndex
+                                    new TrackerEventStructure(),
+                                    new TrackerEventStructure(),
+                                    new TrackerEventStructure() } } } };
 
                             // m_removeMask
                             switch (bitReader.Read(2))
@@ -253,8 +253,8 @@ namespace Heroes.ReplayParser
                             else
                                 bitReader.Read(3);
 
-							// m_mask
-							switch(bitReader.Read(2))
+                            // m_mask
+                            switch(bitReader.Read(2))
                             {
                                 case 0: // None
                                     break;
@@ -273,18 +273,18 @@ namespace Heroes.ReplayParser
                             bitReader.Read(4); // m_controlGroupId
 
                             // m_selectionSyncData
-							if (replayVersionMajor < 2)
-							{
-								bitReader.Read(9); // m_count
-								bitReader.Read(9); // m_subgroupCount
-								bitReader.Read(9); // m_activeSubgroupIndex
-							}
-							else
-							{
-								bitReader.Read(6); // m_count
-								bitReader.Read(6); // m_subgroupCount
-								bitReader.Read(5); // m_activeSubgroupIndex
-							}
+                            if (replayVersionMajor < 2)
+                            {
+                                bitReader.Read(9); // m_count
+                                bitReader.Read(9); // m_subgroupCount
+                                bitReader.Read(9); // m_activeSubgroupIndex
+                            }
+                            else
+                            {
+                                bitReader.Read(6); // m_count
+                                bitReader.Read(6); // m_subgroupCount
+                                bitReader.Read(5); // m_activeSubgroupIndex
+                            }
                             
                             bitReader.Read(32); // m_unitTagsChecksum
                             bitReader.Read(32); // m_subgroupIndicesChecksum
@@ -384,14 +384,14 @@ namespace Heroes.ReplayParser
                                     gameEvent.data.array[2].blob = bitReader.ReadBlobPrecededWithLength(11);
                                     break;
                                 case 5: // MouseButton or MouseEvent
-									if(replayBuild == 57547 || replayBuild > 57589)
-										gameEvent.data.array[2].array = new[]
-										{
-											new TrackerEventStructure { vInt = bitReader.Read(16) }, // m_button
-											new TrackerEventStructure { vInt = bitReader.Read(16) } // m_metaKeyFlags
-										};
-									else
-										gameEvent.data.array[2].unsignedInt = bitReader.Read(32);
+                                    if(replayBuild == 57547 || replayBuild > 57589)
+                                        gameEvent.data.array[2].array = new[]
+                                        {
+                                            new TrackerEventStructure { vInt = bitReader.Read(16) }, // m_button
+                                            new TrackerEventStructure { vInt = bitReader.Read(16) } // m_metaKeyFlags
+                                        };
+                                    else
+                                        gameEvent.data.array[2].unsignedInt = bitReader.Read(32);
                                     break;
                             }
                             break;
@@ -457,11 +457,11 @@ namespace Heroes.ReplayParser
                             gameEvent.data = new TrackerEventStructure { vInt = bitReader.Read(32) - 2147483648 };
                             break;
                         case GameEventType.CGameUserLeaveEvent:
-							// m_leaveReason
-							if(replayBuild >= 55929)
-								bitReader.Read(5);
-							else
-								bitReader.Read(4);
+                            // m_leaveReason
+                            if(replayBuild >= 55929)
+                                bitReader.Read(5);
+                            else
+                                bitReader.Read(4);
                             break;
                         case GameEventType.CGameUserJoinEvent:
                             gameEvent.data = new TrackerEventStructure { array = new TrackerEventStructure[5] };

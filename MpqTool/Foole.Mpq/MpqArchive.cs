@@ -33,40 +33,40 @@ using System.IO;
 
 namespace Foole.Mpq
 {
-	public class MpqArchive : IDisposable, IEnumerable<MpqEntry>
-	{
-		private MpqHeader _mpqHeader;
-		private long _headerOffset;
-		public MpqHash[] _hashes;
-		private MpqEntry[] _entries;
-		
-		private static uint[] sStormBuffer;
+    public class MpqArchive : IDisposable, IEnumerable<MpqEntry>
+    {
+        private MpqHeader _mpqHeader;
+        private long _headerOffset;
+        public MpqHash[] _hashes;
+        private MpqEntry[] _entries;
+        
+        private static uint[] sStormBuffer;
 
         internal Stream BaseStream { get; private set; }
         public int BlockSize { get; private set; }
 
-		static MpqArchive()
-		{
-			sStormBuffer = BuildStormBuffer();
-		}
+        static MpqArchive()
+        {
+            sStormBuffer = BuildStormBuffer();
+        }
 
-		public MpqArchive(string filename)
-		{
-			BaseStream = File.Open(filename, FileMode.Open, FileAccess.Read);
-			try {
-				Init();
-			} catch {
-				// close stream if constructor failed
-				Dispose();
-				throw;
-			}
-		}
-		
-		public MpqArchive(Stream sourceStream)
-		{
+        public MpqArchive(string filename)
+        {
+            BaseStream = File.Open(filename, FileMode.Open, FileAccess.Read);
+            try {
+                Init();
+            } catch {
+                // close stream if constructor failed
+                Dispose();
+                throw;
+            }
+        }
+        
+        public MpqArchive(Stream sourceStream)
+        {
             BaseStream = sourceStream;
-			Init();
-		}
+            Init();
+        }
 
         public MpqArchive(Stream sourceStream, bool loadListfile)
         {
@@ -76,15 +76,15 @@ namespace Foole.Mpq
                 AddListfileFilenames();
         }
 
-		public void Dispose()
-		{
+        public void Dispose()
+        {
             if (BaseStream != null)
                 BaseStream.Close();
-		}
+        }
 
-		private void Init()
-		{
-			if (LocateMpqHeader() == false)
+        private void Init()
+        {
+            if (LocateMpqHeader() == false)
                 throw new MpqParserException("Unable to find MPQ header");
 
             if (_mpqHeader.HashTableOffsetHigh != 0 || _mpqHeader.ExtendedBlockTableOffset != 0 || _mpqHeader.BlockTableOffsetHigh != 0)
@@ -94,70 +94,70 @@ namespace Foole.Mpq
 
             BlockSize = 0x200 << _mpqHeader.BlockSize;
 
-			// Load hash table
+            // Load hash table
             BaseStream.Seek(_mpqHeader.HashTablePos, SeekOrigin.Begin);
-			byte[] hashdata = br.ReadBytes((int)(_mpqHeader.HashTableSize * MpqHash.Size));
-			DecryptTable(hashdata, "(hash table)");
+            byte[] hashdata = br.ReadBytes((int)(_mpqHeader.HashTableSize * MpqHash.Size));
+            DecryptTable(hashdata, "(hash table)");
 
-			BinaryReader br2 = new BinaryReader(new MemoryStream(hashdata));
-			_hashes = new MpqHash[_mpqHeader.HashTableSize];
+            BinaryReader br2 = new BinaryReader(new MemoryStream(hashdata));
+            _hashes = new MpqHash[_mpqHeader.HashTableSize];
 
-			for (int i = 0; i < _mpqHeader.HashTableSize; i++)
-				_hashes[i] = new MpqHash(br2);
+            for (int i = 0; i < _mpqHeader.HashTableSize; i++)
+                _hashes[i] = new MpqHash(br2);
 
-			// Load entry table
+            // Load entry table
             BaseStream.Seek(_mpqHeader.BlockTablePos, SeekOrigin.Begin);
-			byte[] entrydata = br.ReadBytes((int)(_mpqHeader.BlockTableSize * MpqEntry.Size));
-			DecryptTable(entrydata, "(block table)");
+            byte[] entrydata = br.ReadBytes((int)(_mpqHeader.BlockTableSize * MpqEntry.Size));
+            DecryptTable(entrydata, "(block table)");
 
-			br2 = new BinaryReader(new MemoryStream(entrydata));
-			_entries = new MpqEntry[_mpqHeader.BlockTableSize];
+            br2 = new BinaryReader(new MemoryStream(entrydata));
+            _entries = new MpqEntry[_mpqHeader.BlockTableSize];
 
-			for (int i = 0; i < _mpqHeader.BlockTableSize; i++)
+            for (int i = 0; i < _mpqHeader.BlockTableSize; i++)
                 _entries[i] = new MpqEntry(br2, (uint)_headerOffset);
-		}
-		
-		private bool LocateMpqHeader()
-		{
+        }
+        
+        private bool LocateMpqHeader()
+        {
             BinaryReader br = new BinaryReader(BaseStream);
 
-			// In .mpq files the header will be at the start of the file
-			// In .exe files, it will be at a multiple of 0x200
+            // In .mpq files the header will be at the start of the file
+            // In .exe files, it will be at a multiple of 0x200
             for (long i = 0; i < BaseStream.Length - MpqHeader.Size; i += 0x200)
-			{
+            {
                 BaseStream.Seek(i, SeekOrigin.Begin);
-				_mpqHeader = MpqHeader.FromReader(br);
+                _mpqHeader = MpqHeader.FromReader(br);
                 if (_mpqHeader != null)
                 {
-					_headerOffset = i;
+                    _headerOffset = i;
                     _mpqHeader.SetHeaderOffset(_headerOffset);
-					return true;
-				}
-			}
-			return false;
-		}
-		
-		public MpqStream OpenFile(string filename)
-		{
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        public MpqStream OpenFile(string filename)
+        {
             MpqEntry entry;
 
             if (!TryGetHashEntry(filename, out MpqHash hash))
-				throw new FileNotFoundException("File not found: " + filename);
+                throw new FileNotFoundException("File not found: " + filename);
 
             entry = _entries[hash.BlockIndex];
             if (entry.Filename == null)
                 entry.Filename = filename;
 
             return new MpqStream(this, entry);
-		}
+        }
 
         public MpqStream OpenFile(MpqEntry entry)
         {
             return new MpqStream(this, entry);
         }
 
-		public bool FileExists(string filename)
-		{
+        public bool FileExists(string filename)
+        {
 
             return TryGetHashEntry(filename, out MpqHash hash);
         }
@@ -213,19 +213,19 @@ namespace Foole.Mpq
             get { return _mpqHeader; }
         }
 
-		private bool TryGetHashEntry(string filename, out MpqHash hash)
-		{
-			uint index = HashString(filename, 0);
-			index  &= _mpqHeader.HashTableSize - 1;
-			uint name1 = HashString(filename, 0x100);
-			uint name2 = HashString(filename, 0x200);
+        private bool TryGetHashEntry(string filename, out MpqHash hash)
+        {
+            uint index = HashString(filename, 0);
+            index  &= _mpqHeader.HashTableSize - 1;
+            uint name1 = HashString(filename, 0x100);
+            uint name2 = HashString(filename, 0x200);
 
-			for(uint i = index; i < _hashes.Length; ++i)
-			{
-				hash = _hashes[i];
+            for(uint i = index; i < _hashes.Length; ++i)
+            {
+                hash = _hashes[i];
                 if (hash.Name1 == name1 && hash.Name2 == name2)
                     return true;
-			}
+            }
             for (uint i = 0; i < index; i++)
             {
                 hash = _hashes[i];
@@ -235,71 +235,71 @@ namespace Foole.Mpq
 
             hash = new MpqHash();
             return false;
-		}
+        }
 
-		internal static uint HashString(string input, int offset)
-		{
-			uint seed1 = 0x7fed7fed;
-			uint seed2 = 0xeeeeeeee;
-			
-			foreach(char c in input)
-			{
-				int val = (int)char.ToUpper(c);
-				seed1 = sStormBuffer[offset + val] ^ (seed1 + seed2);
-				seed2 = (uint)val + seed1 + seed2 + (seed2 << 5) + 3;
-			}
-			return seed1;
-		}
-		
-		// Used for Hash Tables and Block Tables
-		internal static void DecryptTable(byte[] data, string key)
-		{
-			DecryptBlock(data, HashString(key, 0x300));
-		}
+        internal static uint HashString(string input, int offset)
+        {
+            uint seed1 = 0x7fed7fed;
+            uint seed2 = 0xeeeeeeee;
+            
+            foreach(char c in input)
+            {
+                int val = (int)char.ToUpper(c);
+                seed1 = sStormBuffer[offset + val] ^ (seed1 + seed2);
+                seed2 = (uint)val + seed1 + seed2 + (seed2 << 5) + 3;
+            }
+            return seed1;
+        }
+        
+        // Used for Hash Tables and Block Tables
+        internal static void DecryptTable(byte[] data, string key)
+        {
+            DecryptBlock(data, HashString(key, 0x300));
+        }
 
-		internal static void DecryptBlock(byte[] data, uint seed1)
-		{
-			uint seed2 = 0xeeeeeeee;
+        internal static void DecryptBlock(byte[] data, uint seed1)
+        {
+            uint seed2 = 0xeeeeeeee;
 
-			// NB: If the block is not an even multiple of 4,
-			// the remainder is not encrypted
-			for (int i = 0; i < data.Length - 3; i += 4)
-			{
-				seed2 += sStormBuffer[0x400 + (seed1 & 0xff)];
+            // NB: If the block is not an even multiple of 4,
+            // the remainder is not encrypted
+            for (int i = 0; i < data.Length - 3; i += 4)
+            {
+                seed2 += sStormBuffer[0x400 + (seed1 & 0xff)];
 
-				uint result = BitConverter.ToUInt32(data, i);
-				result ^= (seed1 + seed2);
+                uint result = BitConverter.ToUInt32(data, i);
+                result ^= (seed1 + seed2);
 
-				seed1 = ((~seed1 << 21) + 0x11111111) | (seed1 >> 11);
-				seed2 = result + seed2 + (seed2 << 5) + 3;
+                seed1 = ((~seed1 << 21) + 0x11111111) | (seed1 >> 11);
+                seed2 = result + seed2 + (seed2 << 5) + 3;
 
-				data[i + 0] = ((byte)(result & 0xff));
-				data[i + 1] = ((byte)((result >> 8) & 0xff));
-				data[i + 2] = ((byte)((result >> 16) & 0xff));
-				data[i + 3] = ((byte)((result >> 24) & 0xff));
-			}
-		}
-		
-		internal static void DecryptBlock(uint[] data, uint seed1)
-		{
-			uint seed2 = 0xeeeeeeee;
+                data[i + 0] = ((byte)(result & 0xff));
+                data[i + 1] = ((byte)((result >> 8) & 0xff));
+                data[i + 2] = ((byte)((result >> 16) & 0xff));
+                data[i + 3] = ((byte)((result >> 24) & 0xff));
+            }
+        }
+        
+        internal static void DecryptBlock(uint[] data, uint seed1)
+        {
+            uint seed2 = 0xeeeeeeee;
 
-			for (int i = 0; i < data.Length; i++)
-			{
-				seed2 += sStormBuffer[0x400 + (seed1 & 0xff)];
-				uint result = data[i];
-				result ^= seed1 + seed2;
+            for (int i = 0; i < data.Length; i++)
+            {
+                seed2 += sStormBuffer[0x400 + (seed1 & 0xff)];
+                uint result = data[i];
+                result ^= seed1 + seed2;
 
-				seed1 = ((~seed1 << 21) + 0x11111111) | (seed1 >> 11);
-				seed2 = result + seed2 + (seed2 << 5) + 3;
-				data[i] = result;
-			}
-		}
+                seed1 = ((~seed1 << 21) + 0x11111111) | (seed1 >> 11);
+                seed2 = result + seed2 + (seed2 << 5) + 3;
+                data[i] = result;
+            }
+        }
 
         // This function calculates the encryption key based on
-		// some assumptions we can make about the headers for encrypted files
-		internal static uint DetectFileSeed(uint value0, uint value1, uint decrypted)
-		{
+        // some assumptions we can make about the headers for encrypted files
+        internal static uint DetectFileSeed(uint value0, uint value1, uint decrypted)
+        {
             uint temp = (value0 ^ decrypted) - 0xeeeeeeee;
 
             for (int i = 0; i < 0x100; i++)
@@ -327,26 +327,26 @@ namespace Foole.Mpq
         }
 
         private static uint[] BuildStormBuffer()
-		{
-			uint seed = 0x100001;
-			
-			uint[] result = new uint[0x500];
-			
-			for(uint index1 = 0; index1 < 0x100; index1++)
-			{
-				uint index2 = index1;
-				for(int i = 0; i < 5; i++, index2 += 0x100)
-				{
-					seed = (seed * 125 + 3) % 0x2aaaab;
-					uint temp = (seed & 0xffff) << 16;
-					seed = (seed * 125 + 3) % 0x2aaaab;
+        {
+            uint seed = 0x100001;
+            
+            uint[] result = new uint[0x500];
+            
+            for(uint index1 = 0; index1 < 0x100; index1++)
+            {
+                uint index2 = index1;
+                for(int i = 0; i < 5; i++, index2 += 0x100)
+                {
+                    seed = (seed * 125 + 3) % 0x2aaaab;
+                    uint temp = (seed & 0xffff) << 16;
+                    seed = (seed * 125 + 3) % 0x2aaaab;
 
-					result[index2]  = temp | (seed & 0xffff);
-				}
-			}
+                    result[index2]  = temp | (seed & 0xffff);
+                }
+            }
 
-			return result;
-		}
+            return result;
+        }
 
         IEnumerator IEnumerable.GetEnumerator()
         {

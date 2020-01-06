@@ -39,11 +39,11 @@
         /// <summary> Gets the build number of the Heroes version used in creating the replay. </summary>
         public int ReplayBuild { get; set; }
 
-		/// <summary> Gets the major version number of the replay. </summary>
-		public int ReplayVersionMajor { get; set; }
+        /// <summary> Gets the major version number of the replay. </summary>
+        public int ReplayVersionMajor { get; set; }
 
-		/// <summary> Gets the version number of the replay. </summary>
-		public string ReplayVersion { get; set; }
+        /// <summary> Gets the version number of the replay. </summary>
+        public string ReplayVersion { get; set; }
 
         /// <summary> Gets the team size of the selected gametype. </summary>
         public string TeamSize { get; set; }
@@ -160,9 +160,9 @@
 
         WarheadJunctionNukeLaunch = 101301,
 
-		EscapeFromBraxisCheckpoint = 102101,
-		EscapeFromBraxisDifficulty = 102102
-	}
+        EscapeFromBraxisCheckpoint = 102101,
+        EscapeFromBraxisDifficulty = 102102
+    }
 
     public enum TeamObjectiveInfernalShrinesPunisherType
     {

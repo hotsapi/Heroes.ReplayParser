@@ -292,8 +292,8 @@ namespace Heroes.ReplayParser
                         break;
 
                     case ReplayAttributeEventType.DraftBanMode:
-						// Options: No Ban (""), One Ban ("1ban"), Two Ban ("2ban"), Mid Ban ("Mban"), Three Ban ("3ban")
-						break;
+                        // Options: No Ban (""), One Ban ("1ban"), Two Ban ("2ban"), Mid Ban ("Mban"), Three Ban ("3ban")
+                        break;
 
                     case ReplayAttributeEventType.DraftTeam1BanChooserSlot:
                     case ReplayAttributeEventType.DraftTeam2BanChooserSlot:
@@ -309,11 +309,11 @@ namespace Heroes.ReplayParser
 
                     case ReplayAttributeEventType.DraftTeam1Ban1:
                     case ReplayAttributeEventType.DraftTeam1Ban2:
-					case ReplayAttributeEventType.DraftTeam1Ban3:
-					case ReplayAttributeEventType.DraftTeam2Ban1:
+                    case ReplayAttributeEventType.DraftTeam1Ban3:
+                    case ReplayAttributeEventType.DraftTeam2Ban1:
                     case ReplayAttributeEventType.DraftTeam2Ban2:
-					case ReplayAttributeEventType.DraftTeam2Ban3:
-						var draftTeamBanValue = encoding.GetString(attribute.Value.Reverse().ToArray()).Trim('\0');
+                    case ReplayAttributeEventType.DraftTeam2Ban3:
+                        var draftTeamBanValue = encoding.GetString(attribute.Value.Reverse().ToArray()).Trim('\0');
                         if (draftTeamBanValue != "")
                             switch (attribute.AttributeType)
                             {
@@ -323,19 +323,19 @@ namespace Heroes.ReplayParser
                                 case ReplayAttributeEventType.DraftTeam1Ban2:
                                     replay.TeamHeroBans[0][1] = draftTeamBanValue;
                                     break;
-								case ReplayAttributeEventType.DraftTeam1Ban3:
-									replay.TeamHeroBans[0][2] = draftTeamBanValue;
-									break;
-								case ReplayAttributeEventType.DraftTeam2Ban1:
+                                case ReplayAttributeEventType.DraftTeam1Ban3:
+                                    replay.TeamHeroBans[0][2] = draftTeamBanValue;
+                                    break;
+                                case ReplayAttributeEventType.DraftTeam2Ban1:
                                     replay.TeamHeroBans[1][0] = draftTeamBanValue;
                                     break;
                                 case ReplayAttributeEventType.DraftTeam2Ban2:
                                     replay.TeamHeroBans[1][1] = draftTeamBanValue;
                                     break;
-								case ReplayAttributeEventType.DraftTeam2Ban3:
-									replay.TeamHeroBans[1][2] = draftTeamBanValue;
-									break;
-							}
+                                case ReplayAttributeEventType.DraftTeam2Ban3:
+                                    replay.TeamHeroBans[1][2] = draftTeamBanValue;
+                                    break;
+                            }
                         break;
                 }
 
@@ -352,14 +352,14 @@ namespace Heroes.ReplayParser
             else if (replay.TeamSize.Equals("FFA"))
                 currentList = attributesffa;
 
-			/* Team is parsed in ReplayDetails.cs, this is unnecessary
+            /* Team is parsed in ReplayDetails.cs, this is unnecessary
             if (currentList != null)
                 foreach (var att in currentList)
                     // Reverse the values then parse, you don't notice the effects of this until theres 10+ teams o.o
                     replay.PlayersWithOpenSlots[att.PlayerId - 1].Team = int.Parse(encoding.GetString(att.Value.Reverse().ToArray()).Trim('\0', 'T')); */
-		}
+        }
 
-		public enum ReplayAttributeEventType
+        public enum ReplayAttributeEventType
         {
             PlayerTypeAttribute = 500,
             Rules = 1000,
