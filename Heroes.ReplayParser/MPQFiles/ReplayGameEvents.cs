@@ -11,7 +11,7 @@ namespace Heroes.ReplayParser
     {
         public const string FileName = "replay.game.events";
 
-        public static List<GameEvent> Parse(byte[] buffer, Player[] clientList, int replayBuild, int replayVersionMajor, bool skipMouseMoveEvents)
+        public static List<GameEvent> Parse(byte[] buffer, Player[] clientList, int replayBuild, int replayVersionMajor, bool parseMouseMoveEvents)
         {
             // Referenced from https://raw.githubusercontent.com/Blizzard/heroprotocol/master/protocol39445.py
 
@@ -419,19 +419,21 @@ namespace Heroes.ReplayParser
                             //bitReader.Read(8); // m_flags (-128)
                             break;
                         case GameEventType.CTriggerMouseMovedEvent:
-                            if (skipMouseMoveEvents) {
-                                bitReader.Skip(11 + 11 + 20 + 20 + 32 + 8);
+                            if (parseMouseMoveEvents) {
+                                gameEvent.data = new TrackerEventStructure
+                                {
+                                    array = new[] {
+                                        // m_posUI
+                                        new TrackerEventStructure { unsignedInt = bitReader.Read(11) },
+                                        new TrackerEventStructure { unsignedInt = bitReader.Read(11) },
+                                        // m_posWorld
+                                        new TrackerEventStructure { array = new[] { new TrackerEventStructure { unsignedInt = bitReader.Read(20) }, new TrackerEventStructure { unsignedInt = bitReader.Read(20) }, new TrackerEventStructure { vInt = bitReader.Read(32) - 2147483648 } } },
+                                        // m_flags
+                                        new TrackerEventStructure { vInt = bitReader.Read(8) - 128 }
+                                    }
+                                };
                             } else {
-                                gameEvent.data = new TrackerEventStructure { array = new[] {
-                                // m_posUI
-                                new TrackerEventStructure { unsignedInt = bitReader.Read(11) },
-                                new TrackerEventStructure { unsignedInt = bitReader.Read(11) },
-
-                                // m_posWorld
-                                new TrackerEventStructure { array = new[] { new TrackerEventStructure { unsignedInt = bitReader.Read(20) }, new TrackerEventStructure { unsignedInt = bitReader.Read(20) }, new TrackerEventStructure { vInt = bitReader.Read(32) - 2147483648 } } },
-
-                                // m_flags
-                                new TrackerEventStructure { vInt = bitReader.Read(8) - 128 } } };
+                                bitReader.Skip(11 + 11 + 20 + 20 + 32 + 8);
                             }
                             break;
                         case GameEventType.CTriggerHotkeyPressedEvent:

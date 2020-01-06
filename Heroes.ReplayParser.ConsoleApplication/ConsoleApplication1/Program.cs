@@ -25,7 +25,7 @@ namespace ParserConsole
             {
                 // Attempt to parse the replay
                 // Ignore errors can be set to true if you want to attempt to parse currently unsupported replays, such as 'VS AI' or 'PTR Region' replays
-                var replayParseResult = DataParser.ParseReplay(tmpPath, ignoreErrors: false, deleteFile: false, allowPTRRegion:true, detailedBattleLobbyParsing: true);
+                var replayParseResult = DataParser.ParseReplay(tmpPath, deleteFile: false, ParseOptions.FullParsing);
 
                 // If successful, the Replay object now has all currently available information
                 if (replayParseResult.Item1 == DataParser.ReplayParseResult.Success || replayParseResult.Item1 == DataParser.ReplayParseResult.SuccessReplayDetail)
