@@ -7,9 +7,6 @@
 
   <ItemGroup>
     <PackageReference Include="DotNetZip" Version="1.13.3" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Remove="Properties\AssemblyInfo.cs" />
   </ItemGroup>
 </Project>

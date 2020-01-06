@@ -36,6 +36,7 @@
 //
 using System;
 using System.IO;
+using System.IO.Compression;
 
 namespace Foole.Mpq
 {
@@ -397,27 +398,26 @@ namespace Foole.Mpq
         {
             using (MemoryStream output = new MemoryStream(expectedLength))
             {
-#if WITH_DOTNETZIP
-                using (var stream = new Ionic.BZip2.BZip2InputStream(data, false))
+                using (var stream = new Ionic.BZip2.BZip2InputStream(data))
                 {
                     stream.CopyTo(output);
                 }
-#elif WITH_BZIP2NET
-                using (var stream = new Bzip2.BZip2InputStream(data, false))
-                {
-                    stream.CopyTo(output);
-                }
-#elif WITH_SHARPCOMPRESS
-                using (var stream = new SharpCompress.Compressors.BZip2.BZip2Stream(data, SharpCompress.Compressors.CompressionMode.Decompress))
-                {
-                    stream.CopyTo(output);
-                }
-#elif WITH_SHARPZIPLIB
-                ICSharpCode.SharpZipLib.BZip2.BZip2.Decompress(data, output, true);
-#else
-                throw new NotImplementedException("Please define which compression library you want to use");
-#endif
+
                 return output.ToArray();
+            }
+        }
+
+        private static byte[] ZlibDecompress(Stream data, int expectedLength)
+        {
+            using (MemoryStream output = new MemoryStream(expectedLength))
+            {
+                using (var stream = new Ionic.Zlib.ZlibStream(data, Ionic.Zlib.CompressionMode.Decompress))
+                {
+                    stream.CopyTo(output);
+                }
+
+                return output.ToArray();
+
             }
         }
 
@@ -425,32 +425,6 @@ namespace Foole.Mpq
         {
             PKLibDecompress pk = new PKLibDecompress(data);
             return pk.Explode(expectedLength);
-        }
-
-        private static byte[] ZlibDecompress(Stream data, int expectedLength)
-        {
-            using (MemoryStream output = new MemoryStream(expectedLength))
-            {
-#if WITH_DOTNETZIP
-                using (var stream = new Ionic.Zlib.ZlibStream(data, Ionic.Zlib.CompressionMode.Decompress))
-                {
-                    stream.CopyTo(output);
-                }
-#elif WITH_SHARPCOMPRESS
-                using (var stream = new SharpCompress.Compressors.Deflate.ZlibStream(data, SharpCompress.Compressors.CompressionMode.Decompress))
-                {
-                    stream.CopyTo(output);
-                }
-#elif WITH_SHARPZIPLIB
-                using (var stream = new ICSharpCode.SharpZipLib.Zip.Compression.Streams.InflaterInputStream(data))
-                {
-                    stream.CopyTo(output);
-                }
-#else
-                throw new NotImplementedException("Please define which compression library you want to use");
-#endif
-                return output.ToArray();
-            }
         }
     }
 }

@@ -22,7 +22,9 @@ namespace Heroes.ReplayParser
             // AutoSelectBug = 12, - Past issue that is no longer applicable
             PreAlphaWipe = 13,
             FileSizeTooLarge = 14,
-            PTRRegion = 15
+            PTRRegion = 15,
+            ParserException,
+            SuccessReplayDetail, // successfull but needs player verification check
         }
 
         public static readonly Dictionary<string, Tuple<double, double, double, double>> MapOffsets = new Dictionary<string, Tuple<double, double, double, double>>
@@ -39,7 +41,7 @@ namespace Heroes.ReplayParser
             { "Battlefield of Eternity", new Tuple<double, double, double, double>(-5.0, 33.0, 1.09, 0.96) }
         };
 
-        public static Tuple<ReplayParseResult, Replay> ParseReplay(byte[] bytes, bool ignoreErrors = false, bool allowPTRRegion = false, bool skipEventParsing = false, bool skipUnitParsing = false, bool skipMouseMoveEvents = false)
+        public static Tuple<ReplayParseResult, Replay> ParseReplay(byte[] bytes, bool ignoreErrors = false, bool allowPTRRegion = false, bool skipEventParsing = false, bool skipUnitParsing = false, bool skipMouseMoveEvents = false, bool detailedBattleLobbyParsing = false)
         {
             var replay = new Replay();
 
@@ -48,23 +50,30 @@ namespace Heroes.ReplayParser
 
             if (!ignoreErrors && replay.ReplayBuild < 32455)
                 return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.PreAlphaWipe, null);
+            try {
+                using (var memoryStream = new MemoryStream(bytes))
+                using (var archive = new MpqArchive(memoryStream))
+                    ParseReplayArchive(replay, archive, ignoreErrors, skipUnitParsing, skipMouseMoveEvents, detailedBattleLobbyParsing);
 
-            using (var memoryStream = new MemoryStream(bytes))
-            using (var archive = new MpqArchive(memoryStream))
-                ParseReplayArchive(replay, archive, ignoreErrors, skipEventParsing, skipUnitParsing, skipMouseMoveEvents);
-
-            return ParseReplayResults(replay, ignoreErrors, allowPTRRegion);
+                return ParseReplayResults(replay, ignoreErrors, allowPTRRegion);
+            }
+            catch
+            {
+                return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.ParserException, null);
+            }
         }
 
         public static Tuple<ReplayParseResult, Replay> ParseReplay(string fileName, bool ignoreErrors, bool deleteFile, bool allowPTRRegion = false, bool skipEventParsing = false, bool skipUnitParsing = false, bool skipMouseMoveEvents = false, bool detailedBattleLobbyParsing = false)
         {
             var replay = new Replay();
 
-            // File in the version numbers for later use.
-            MpqHeader.ParseHeader(replay, fileName);
+            try
+            {
+                // File in the version numbers for later use.
+                MpqHeader.ParseHeader(replay, fileName);
 
-            if (!ignoreErrors && replay.ReplayBuild < 32455)
-                return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.PreAlphaWipe, null);
+                if (!ignoreErrors && replay.ReplayBuild < 32455)
+                    return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.PreAlphaWipe, new Replay { ReplayBuild = replay.ReplayBuild });
 
             using (var archive = new MpqArchive(fileName))
                 ParseReplayArchive(replay, archive, ignoreErrors, skipEventParsing, skipUnitParsing, skipMouseMoveEvents, detailedBattleLobbyParsing);
@@ -72,7 +81,12 @@ namespace Heroes.ReplayParser
             if (deleteFile)
                 File.Delete(fileName);
 
-            return ParseReplayResults(replay, ignoreErrors, allowPTRRegion);
+                return ParseReplayResults(replay, ignoreErrors, allowPTRRegion);
+            }
+            catch
+            {
+                return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.ParserException, new Replay { ReplayBuild = replay.ReplayBuild });
+            }
         }
 
         private static Tuple<ReplayParseResult, Replay> ParseReplayResults(Replay replay, bool ignoreErrors, bool allowPTRRegion)
@@ -81,27 +95,29 @@ namespace Heroes.ReplayParser
                 return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.UnexpectedResult, replay);
             else if (replay.Players.Length == 1)
                 // Filter out 'Try Me' games, as they have unusual format that throws exceptions in other areas
-                return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.TryMeMode, null);
+                return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.TryMeMode, new Replay { ReplayBuild = replay.ReplayBuild });
             else if (replay.Players.Length <= 5)
                 // Custom game with all computer players on the opposing team won't register them as players at all (Noticed at build 34053)
-                return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.ComputerPlayerFound, null);
+                return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.ComputerPlayerFound, new Replay { ReplayBuild = replay.ReplayBuild });
             else if (replay.Players.All(i => !i.IsWinner) || replay.ReplayLength.TotalMinutes < 2)
-                return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.Incomplete, null);
+                return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.Incomplete, new Replay { ReplayBuild = replay.ReplayBuild });
             else if (replay.Timestamp == DateTime.MinValue)
-                return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.UnexpectedResult, null);
+                return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.UnexpectedResult, new Replay { ReplayBuild = replay.ReplayBuild });
             else if (replay.Timestamp < new DateTime(2014, 10, 6, 0, 0, 0, DateTimeKind.Utc))
-                return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.PreAlphaWipe, null);
+                return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.PreAlphaWipe, new Replay { ReplayBuild = replay.ReplayBuild });
             else if (replay.Players.Count(i => i.PlayerType == PlayerType.Computer || i.Character == "Random Hero" || i.Name.Contains(' ')) > (replay.GameMode == GameMode.Brawl ? 5 : 0))
-                return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.ComputerPlayerFound, null);
+                return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.ComputerPlayerFound, new Replay { ReplayBuild = replay.ReplayBuild });
             else if (!allowPTRRegion && replay.Players.Any(i => i.BattleNetRegionId >= 90 /* PTR/Test Region */))
-                return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.PTRRegion, null);
+                return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.PTRRegion, new Replay { ReplayBuild = replay.ReplayBuild });
             else if (replay.Players.Count(i => i.IsWinner) != 5 || replay.Players.Length != 10 || (replay.GameMode != GameMode.StormLeague && replay.GameMode != GameMode.TeamLeague && replay.GameMode != GameMode.HeroLeague && replay.GameMode != GameMode.UnrankedDraft && replay.GameMode != GameMode.QuickMatch && replay.GameMode != GameMode.Custom && replay.GameMode != GameMode.Brawl))
-                return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.UnexpectedResult, null);
+                return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.UnexpectedResult, new Replay { ReplayBuild = replay.ReplayBuild });
+            else if (!replay.ReplayDetailParsedSuccessfully)
+                return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.SuccessReplayDetail, replay);
             else
                 return new Tuple<ReplayParseResult, Replay>(ReplayParseResult.Success, replay);
         }
 
-        private static void ParseReplayArchive(Replay replay, MpqArchive archive, bool ignoreErrors, bool skipEventParsing, bool skipUnitParsing, bool skipMouseMoveEvents, bool detailedBattleLobbyParsing = false)
+        private static void ParseReplayArchive(Replay replay, MpqArchive archive, bool ignoreErrors, bool skipEventParsing, bool skipUnitParsing, bool skipMouseMoveEvents, bool detailedBattleLobbyParsing = false, bool skipMessageEvents = true)
         {
             archive.AddListfileFilenames();
 
@@ -129,7 +145,6 @@ namespace Heroes.ReplayParser
             if (!skipEventParsing)
             {
                 replay.TrackerEvents = ReplayTrackerEvents.Parse(GetMpqFile(archive, ReplayTrackerEvents.FileName));
-
                 try
                 {
                     replay.GameEvents = ReplayGameEvents.Parse(GetMpqFile(archive, ReplayGameEvents.FileName), replay.ClientListByUserID, replay.ReplayBuild, replay.ReplayVersionMajor, skipMouseMoveEvents);
@@ -152,7 +167,6 @@ namespace Heroes.ReplayParser
                     foreach (var player in talentGameEventsDictionary.Keys)
                         player.Talents = talentGameEventsDictionary[player];
                 }
-
 	            // Replay Server Battlelobby
 	            if (!ignoreErrors && archive.Any(i => i.Filename == ReplayServerBattlelobby.FileName))
 	            {
@@ -180,7 +194,10 @@ namespace Heroes.ReplayParser
                     }
 
                 // Replay Message Events
-                // ReplayMessageEvents.Parse(replay, GetMpqFile(archive, ReplayMessageEvents.FileName));
+                if (!skipMessageEvents)
+                {
+                    ReplayMessageEvents.Parse(replay, GetMpqFile(archive, ReplayMessageEvents.FileName));
+                }
 
                 // Replay Resumable Events
                 // So far it doesn't look like this file has anything we would be interested in

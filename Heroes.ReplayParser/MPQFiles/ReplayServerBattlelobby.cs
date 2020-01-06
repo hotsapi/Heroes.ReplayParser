@@ -385,7 +385,7 @@
             // theres some HeroICONs and other repetitive stuff
         }
 
-        // Detect the change that happended in build 47479 on November 2, 2016
+        // Detect the change that happened in build 47479 on November 2, 2016
         private static bool DetectBattleTagChangeBuild47479(Replay replay, BitReader bitReader)
         {
             if (replay.ReplayBuild != 47479)
