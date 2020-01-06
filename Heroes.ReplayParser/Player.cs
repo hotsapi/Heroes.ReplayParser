@@ -181,6 +181,7 @@ namespace Heroes.ReplayParser
         /// </summary>
         public ScoreResult ScoreResult { get; set; } = new ScoreResult();
 
+
         /// <summary>
         /// Gets or sets the player's Upgrade Events
         /// </summary>
@@ -242,7 +243,10 @@ namespace Heroes.ReplayParser
 
         public int? Healing { get; set; } = null;
         public int SelfHealing { get; set; } = 0;
-
+        /// <summary>
+        /// Gets or sets the number of regen globes a player gathered during the game
+        /// </summary>
+        public int RegenGlobes { get; set; }
         public int? DamageTaken { get; set; } = null;
         public int? DamageSoaked { get; set; } = null;
 

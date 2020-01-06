@@ -4,6 +4,17 @@ using System.Text;
 
 namespace Heroes.ReplayParser
 {
+    /// <summary>
+    /// Parse options, represented as a class.
+    /// 
+    /// Default options are automatically set, typical use would
+    /// be to either use one of the provided static option sets,
+    /// or to set your own option set in the initializer
+    /// 
+    /// i.e. new ParseOption() {
+    /// ShouldParseUnits = true
+    /// }
+    /// </summary>
     public class ParseOptions
     {
         public bool IgnoreErrors { get; set; } = false;
@@ -27,5 +38,8 @@ namespace Heroes.ReplayParser
             ShouldParseUnits = false,
             ShouldParseMouseEvents = false
         };
+
+        public static ParseOptions TypicalParsing => new ParseOptions();
+
     }
 }
