@@ -170,7 +170,7 @@ namespace Heroes.ReplayParser
                 // Replay Server Battlelobby
                 if (!parseOptions.IgnoreErrors && archive.Any(i => i.Filename == ReplayServerBattlelobby.FileName))
                 {
-                    if (parseOptions.ShouldParseDetaileBattleLobby)
+                    if (parseOptions.ShouldParseDetailedBattleLobby)
                         ReplayServerBattlelobby.Parse(replay, GetMpqFile(archive, ReplayServerBattlelobby.FileName));
                     else
                         ReplayServerBattlelobby.GetBattleTags(replay, GetMpqFile(archive, ReplayServerBattlelobby.FileName));
