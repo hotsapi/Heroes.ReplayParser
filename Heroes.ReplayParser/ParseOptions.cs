@@ -36,6 +36,14 @@ namespace Heroes.ReplayParser
             ShouldParseUnits = true,
             ShouldParseMessageEvents = true,
         };
+        
+        public static ParseOptions MediumParsing => new ParseOptions()
+        {
+            ShouldParseEvents = false,
+            ShouldParseUnits = false,
+            ShouldParseMouseEvents = false,
+            ShouldParseDetaileBattleLobby = true
+        };
 
         /// <summary>
         /// Parse as little as possible
