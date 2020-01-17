@@ -19,7 +19,7 @@ namespace Heroes.ReplayParser
     {
         public bool IgnoreErrors { get; set; } = false;
         public bool AllowPTR { get; set; } = false;
-        public bool ShouldParseEvents { get; set; } = false;
+        public bool ShouldParseEvents { get; set; } = true;
         public bool ShouldParseUnits { get; set; } = false;
         public bool ShouldParseMouseEvents { get; set; } = false;
         public bool ShouldParseDetailedBattleLobby { get; set; } = true;
@@ -32,7 +32,6 @@ namespace Heroes.ReplayParser
         {
             AllowPTR = true,
             ShouldParseDetailedBattleLobby = true,
-            ShouldParseEvents = true,
             ShouldParseMouseEvents = true,
             ShouldParseUnits = true,
             ShouldParseMessageEvents = true,
@@ -43,6 +42,7 @@ namespace Heroes.ReplayParser
         /// </summary>
         public static ParseOptions MinimalParsing => new ParseOptions()
         {
+            ShouldParseEvents = false,
             ShouldParseDetailedBattleLobby = false
         };
 
